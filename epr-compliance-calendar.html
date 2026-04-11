@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="en" class="h-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compliance Calendar — EPR Portal</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap"
+    rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          borderWidth: { 3: '3px' },
+          fontFamily: { sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'] },
+        }
+      }
+    };
+  </script>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    .app-wrapper { min-height: 100%; width: 100%; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    .dashboard-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .dashboard-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04); }
+
+    .cal-hero {
+      background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 45%, #5b21b6 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .cal-hero::after {
+      content: '';
+      position: absolute;
+      right: -4rem;
+      top: -4rem;
+      width: 12rem;
+      height: 12rem;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 1px;
+      background: #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+    .cal-weekday {
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      padding: 10px 8px;
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+    }
+    .cal-cell {
+      min-height: 108px;
+      background: #fff;
+      padding: 6px 8px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: background 0.15s ease;
+    }
+    @media (min-width: 640px) {
+      .cal-cell { min-height: 124px; padding: 8px 10px 10px; }
+    }
+    .cal-cell--muted { background: #fafafa; color: #94a3b8; }
+    .cal-cell--today {
+      background: linear-gradient(180deg, #faf5ff 0%, #fff 100%);
+      box-shadow: inset 0 0 0 2px #7c3aed;
+    }
+    .cal-cell:not(.cal-cell--muted):hover { background: #f8fafc; cursor: pointer; }
+
+    .cal-daynum {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .cal-cell--muted .cal-daynum { color: #cbd5e1; font-weight: 600; }
+
+    .cal-event {
+      font-size: 0.65rem;
+      line-height: 1.25;
+      padding: 3px 6px;
+      border-radius: 6px;
+      font-weight: 600;
+      border-left: 3px solid transparent;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .cal-event:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+    }
+    .ev-completed { background: #d1fae5; color: #065f46; border-left-color: #059669; }
+    .ev-pending { background: #fef3c7; color: #92400e; border-left-color: #d97706; }
+    .ev-overdue { background: #fee2e2; color: #991b1b; border-left-color: #dc2626; }
+    .ev-not_due { background: #dbeafe; color: #1e40af; border-left-color: #2563eb; }
+    .ev-future { background: #f1f5f9; color: #475569; border-left-color: #94a3b8; }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal-content {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.94);
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      z-index: 1001;
+      width: min(520px, 94vw);
+      max-height: 85vh;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .modal-content.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up { animation: fadeInUp 0.45s ease forwards; }
+
+    .filter-chip {
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 2px solid #e2e8f0;
+      background: #fff;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-chip:hover { border-color: #c4b5fd; color: #5b21b6; }
+    .filter-chip.active {
+      background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(109, 40, 217, 0.35);
+    }
+
+    body { box-sizing: border-box; }
+  </style>
+</head>
+
+<body class="h-full bg-slate-100 font-sans">
+  <div class="app-wrapper flex min-h-full w-full flex-col">
+    <header class="z-20 flex-shrink-0 bg-white shadow-md">
+      <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+        <div class="flex flex-wrap items-center gap-4 sm:gap-6">
+          <div class="flex items-center space-x-4">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-green-400 to-emerald-600">
+              <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-xl font-bold leading-tight text-gray-800">Compliance Calendar</h1>
+              <p class="text-xs text-gray-500">Monitor and track your compliance requirements efficiently</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2 rounded-lg bg-gray-100 p-1">
+            <button type="button" class="epr-category-tab active rounded-md px-4 py-2 text-sm font-semibold transition-all sm:px-6" data-category="pwmr">PWMR</button>
+            <button type="button" class="epr-category-tab rounded-md px-4 py-2 text-sm font-semibold transition-all sm:px-6" data-category="bwmr">BWMR</button>
+            <button type="button" class="epr-category-tab rounded-md px-4 py-2 text-sm font-semibold transition-all sm:px-6" data-category="ewmr">EWMR</button>
+          </div>
+        </div>
+        <div class="flex flex-shrink-0 items-center gap-2 sm:gap-4">
+          <div class="hidden text-right text-xs text-gray-500 sm:block">
+            <span class="block text-gray-400">Last updated</span>
+            <span id="last-updated" class="font-semibold text-gray-800">27 Jun 2025</span>
+          </div>
+          <div class="relative">
+            <button id="fiscal-year-btn" type="button"
+              class="flex items-center gap-2 rounded-lg border-2 border-gray-200 bg-gray-50 px-3 py-2 text-sm transition-colors hover:border-violet-500 focus:outline-none sm:px-4">
+              <div>
+                <span class="text-xs text-gray-500">Fiscal Year</span>
+                <span class="block text-sm font-semibold text-gray-900" id="fiscal-year-display">2024-25</span>
+              </div>
+              <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </button>
+            <div id="fiscal-year-dropdown"
+              class="absolute right-0 top-full z-40 mt-2 hidden min-w-max rounded-lg border border-gray-200 bg-white shadow-lg">
+              <button type="button" class="fy-option w-full rounded-t-lg px-4 py-2 text-left text-sm font-semibold text-gray-900 hover:bg-gray-50" data-fy="2024-25">2024-25 (Current)</button>
+              <button type="button" class="fy-option w-full px-4 py-2 text-left text-sm text-gray-600 hover:bg-gray-50" data-fy="2023-24">2023-24</button>
+              <button type="button" class="fy-option w-full rounded-b-lg px-4 py-2 text-left text-sm text-gray-600 hover:bg-gray-50" data-fy="2022-23">2022-23</button>
+            </div>
+          </div>
+          <div class="hidden rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 sm:block">
+            <span class="text-xs text-violet-700">Status</span>
+            <span class="block text-sm font-semibold text-violet-900">On track</span>
+          </div>
+          <button type="button" class="rounded-lg p-2 transition-colors hover:bg-gray-100" aria-label="Notifications">
+            <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+          </button>
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-emerald-600">
+            <span class="text-sm font-semibold text-white">AD</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="bg-gradient-to-r from-slate-800 to-slate-700 px-6">
+        <div class="flex flex-wrap items-center gap-x-1 gap-y-0">
+          <a href="index.html#home-section"
+            class="nav-item flex cursor-pointer items-center space-x-2 border-b-3 border-transparent px-4 py-4 text-white hover:bg-white hover:bg-opacity-10 no-underline sm:px-6">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg><span class="whitespace-nowrap text-sm font-medium">Home Dashboard</span>
+          </a>
+          <a href="index.html#leadership-section"
+            class="nav-item flex cursor-pointer items-center space-x-2 border-b-3 border-transparent px-4 py-4 text-white hover:bg-white hover:bg-opacity-10 no-underline sm:px-6">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg><span class="whitespace-nowrap text-sm font-medium">Leadership All EPR Dashboard</span>
+          </a>
+          <a href="epr-compliance-calendar.html"
+            class="nav-item flex cursor-pointer items-center space-x-2 border-b-3 border-violet-400 bg-white bg-opacity-10 px-4 py-4 font-semibold text-white no-underline sm:px-6">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg><span class="whitespace-nowrap text-sm font-medium">Compliance Calendar</span>
+          </a>
+          <div class="nav-parent relative">
+            <div class="nav-item flex cursor-pointer items-center space-x-2 border-b-3 border-transparent px-4 py-4 text-white hover:bg-white hover:bg-opacity-10 sm:px-6" data-toggle="main-menu">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg><span class="whitespace-nowrap text-sm font-medium">Menu</span>
+              <svg class="h-4 w-4 transform transition-transform" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+            <div class="submenu-horizontal absolute left-0 top-full z-30 min-w-[280px] rounded-b-lg bg-slate-800 shadow-lg" id="main-menu">
+              <a href="epr-compliance-dashboard.html" class="nav-item block w-full cursor-pointer px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">EPR Compliance Dashboard</a>
+              <a href="epr-purchase.html" class="nav-item block w-full cursor-pointer px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">EPR Purchase</a>
+              <a href="epr-consumption-dashboard.html" class="nav-item block w-full cursor-pointer px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">EPR Consumption</a>
+              <a href="epr-credit-page.html" class="nav-item block w-full cursor-pointer px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">EPR Credits</a>
+              <a href="epr-account-wise.html" class="nav-item block w-full cursor-pointer px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">Account Wise View</a>
+              <a href="index.html#real-time-section" class="nav-item block w-full cursor-pointer rounded-b-lg px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">Real Time Data Status</a>
+            </div>
+          </div>
+          <div class="mx-2 hidden h-6 w-px bg-gray-600 sm:block"></div>
+          <a href="index.html#ai-insights-section"
+            class="nav-item flex cursor-pointer items-center space-x-2 border-b-3 border-transparent px-4 py-4 text-white hover:bg-white hover:bg-opacity-10 no-underline sm:px-6">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg><span class="whitespace-nowrap text-sm font-medium">AI Insights</span>
+          </a>
+          <a href="index.html#ai-copilot-section"
+            class="nav-item flex cursor-pointer items-center space-x-2 border-b-3 border-transparent px-4 py-4 text-white hover:bg-white hover:bg-opacity-10 no-underline sm:px-6">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg><span class="whitespace-nowrap text-sm font-medium">AI Copilot</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="border-b border-gray-200 bg-gray-50 px-6 py-3">
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <div class="flex items-center space-x-3">
+            <label for="group-filter" class="whitespace-nowrap text-sm font-medium text-gray-700">Group:</label>
+            <select id="group-filter" class="min-w-[180px] rounded-lg border-2 border-gray-200 bg-white px-4 py-2 text-sm focus:border-violet-500 focus:outline-none sm:min-w-[200px]">
+              <option value="all">All Groups</option>
+              <option value="global">Global Enterprises Ltd</option>
+              <option value="asia">Asia Pacific Group</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-3">
+            <label for="entity-filter" class="whitespace-nowrap text-sm font-medium text-gray-700">Entity:</label>
+            <select id="entity-filter" class="min-w-[200px] rounded-lg border-2 border-gray-200 bg-white px-4 py-2 text-sm focus:border-violet-500 focus:outline-none sm:min-w-[240px]">
+              <option value="all">All Legal Entities</option>
+              <option value="mfg">Manufacturing Unit - Delhi</option>
+              <option value="dist">Distribution Hub - Mumbai</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-3">
+            <label for="user-filter" class="whitespace-nowrap text-sm font-medium text-gray-700">User View:</label>
+            <select id="user-filter" class="min-w-[160px] rounded-lg border-2 border-gray-200 bg-white px-4 py-2 text-sm focus:border-violet-500 focus:outline-none">
+              <option>Aggregated View</option>
+              <option>Individual View</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto w-full max-w-7xl flex-1 space-y-6 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+      <!-- Purple hero -->
+      <section class="cal-hero relative z-0 overflow-hidden rounded-2xl p-6 sm:p-8 animate-fade-in-up shadow-lg">
+        <div class="relative z-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">Compliance Calendar Dashboard</h2>
+            <p class="mt-1 max-w-xl text-sm text-violet-100">Plan filings, see deadlines at a glance, and act before obligations become overdue.</p>
+          </div>
+          <p class="text-xs font-medium text-violet-200 sm:text-right">FY focus: <span id="hero-fy" class="text-white">2024-25</span></p>
+        </div>
+      </section>
+
+      <!-- KPIs -->
+      <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-fade-in-up" style="animation-delay:0.04s">
+        <div class="dashboard-card p-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-slate-500">Completed</p>
+              <p id="kpi-completed" class="mt-1 text-3xl font-bold text-slate-900">—</p>
+            </div>
+            <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-100">
+              <svg class="h-7 w-7 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-card p-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-slate-500">Pending</p>
+              <p id="kpi-pending" class="mt-1 text-3xl font-bold text-slate-900">—</p>
+            </div>
+            <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-amber-100">
+              <svg class="h-7 w-7 text-amber-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-card p-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-slate-500">Overdue</p>
+              <p id="kpi-overdue" class="mt-1 text-3xl font-bold text-slate-900">—</p>
+            </div>
+            <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-red-100">
+              <svg class="h-7 w-7 text-red-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-card p-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-slate-500">Total tasks</p>
+              <p id="kpi-total" class="mt-1 text-3xl font-bold text-slate-900">—</p>
+            </div>
+            <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-violet-100">
+              <svg class="h-7 w-7 text-violet-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts -->
+      <section class="grid grid-cols-1 gap-6 xl:grid-cols-2 animate-fade-in-up" style="animation-delay:0.08s">
+        <div class="dashboard-card p-5">
+          <h3 class="text-lg font-bold text-slate-900">Compliance status overview</h3>
+          <p class="text-xs text-slate-500">Distribution across tracked obligations</p>
+          <div class="mx-auto mt-4 h-64 max-w-xs">
+            <canvas id="chart-status"></canvas>
+          </div>
+          <div class="mt-4 flex flex-wrap justify-center gap-3 text-xs text-slate-600">
+            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span> Completed</span>
+            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-amber-500"></span> Pending</span>
+            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-red-500"></span> Overdue</span>
+            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-blue-500"></span> Not yet due</span>
+            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-slate-400"></span> Upcoming</span>
+          </div>
+        </div>
+        <div class="dashboard-card p-5">
+          <h3 class="text-lg font-bold text-slate-900">Quarterly compliance trend</h3>
+          <p class="text-xs text-slate-500">On-time filing index by period (sample)</p>
+          <div class="mt-4 h-72">
+            <canvas id="chart-trend"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Calendar -->
+      <section class="dashboard-card animate-fade-in-up p-5 sm:p-6" style="animation-delay:0.1s">
+        <div class="flex flex-col gap-4 border-b border-slate-100 pb-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">Compliance schedule</h3>
+            <p class="text-xs text-slate-500">Click a day or an event for details and proof upload.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" id="cal-prev" class="rounded-lg border-2 border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:bg-violet-50" aria-label="Previous month">←</button>
+            <h4 id="cal-month-label" class="min-w-[10rem] text-center text-base font-bold text-slate-900 sm:min-w-[12rem]">—</h4>
+            <button type="button" id="cal-next" class="rounded-lg border-2 border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:bg-violet-50" aria-label="Next month">→</button>
+            <button type="button" id="cal-today"
+              class="rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:from-violet-700 hover:to-purple-700">Today</button>
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button type="button" class="filter-chip active" data-filter="all">All</button>
+          <button type="button" class="filter-chip" data-filter="completed">Filed</button>
+          <button type="button" class="filter-chip" data-filter="pending">In progress</button>
+          <button type="button" class="filter-chip" data-filter="overdue">Overdue / revision</button>
+          <button type="button" class="filter-chip" data-filter="not_due">Not yet due</button>
+          <button type="button" class="filter-chip" data-filter="future">Upcoming</button>
+        </div>
+
+        <div class="mt-4 overflow-x-auto">
+          <div class="min-w-[640px]">
+            <div class="cal-grid" id="cal-grid"></div>
+          </div>
+        </div>
+
+        <div class="mt-5 flex flex-wrap gap-4 border-t border-slate-100 pt-4 text-xs text-slate-600">
+          <span class="flex items-center gap-2"><span class="h-3 w-3 rounded bg-emerald-500"></span> Filed / Compliant</span>
+          <span class="flex items-center gap-2"><span class="h-3 w-3 rounded bg-amber-500"></span> Draft / In progress</span>
+          <span class="flex items-center gap-2"><span class="h-3 w-3 rounded bg-red-500"></span> Revision / Overdue</span>
+          <span class="flex items-center gap-2"><span class="h-3 w-3 rounded bg-blue-500"></span> Not yet due</span>
+          <span class="flex items-center gap-2"><span class="h-3 w-3 rounded bg-slate-400"></span> Future</span>
+        </div>
+      </section>
+    </main>
+
+    <footer class="mt-8 bg-slate-900 py-6 text-slate-400">
+      <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+        <p class="text-sm">© 2024 EPR Portal. All rights reserved.</p>
+      </div>
+    </footer>
+  </div>
+
+  <div id="modal-overlay" class="modal-overlay" onclick="closeDayModal()"></div>
+  <div id="modal-content" class="modal-content">
+    <div class="flex items-center justify-between bg-gradient-to-r from-violet-700 to-purple-700 px-5 py-4 text-white">
+      <h3 id="modal-title" class="text-lg font-bold">Compliance details</h3>
+      <button type="button" onclick="closeDayModal()" class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 transition hover:bg-white/25" aria-label="Close">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <div id="modal-body" class="max-h-[min(70vh,420px)] overflow-y-auto p-5"></div>
+  </div>
+
+  <script>
+    const STATUS_LABELS = {
+      completed: 'Filed / Compliant',
+      pending: 'Draft / In progress',
+      overdue: 'Revision required / Overdue',
+      not_due: 'Not yet due',
+      future: 'Not started / Future'
+    };
+
+    /** Demo obligations — 2 completed / 2 pending / 1 overdue (reference KPIs); extra items show more calendar colours when you extend data */
+    const COMPLIANCE_EVENTS = [
+      { id: 1, date: '2026-04-05', title: 'PWMR Q1 return', rule: 'PWMR', complianceType: 'Post registration', entityType: 'Producer', fy: '2025-26', periodicity: 'Qtr1', filingDate: '2026-04-05', delayDays: 0, status: 'completed' },
+      { id: 2, date: '2026-04-08', title: 'BWMR Q1 filing', rule: 'BWMR', complianceType: 'Quarterly', entityType: 'Producer', fy: '2025-26', periodicity: 'Qtr1', filingDate: '2026-04-08', delayDays: 0, status: 'completed' },
+      { id: 3, date: '2026-04-15', title: 'EWMR annual statement', rule: 'EWMR', complianceType: 'Annual filing', entityType: 'Producer', fy: '2024-25', periodicity: 'Annual', filingDate: '2026-04-22', delayDays: 0, status: 'not_due' },
+      { id: 4, date: '2026-04-18', title: 'PWMR EPR plan update', rule: 'PWMR', complianceType: 'EPR plan update', entityType: 'Brand Owner', fy: '2025-26', periodicity: 'Qtr2', filingDate: '2026-04-18', delayDays: 2, status: 'pending' },
+      { id: 5, date: '2026-04-22', title: 'Importer declaration', rule: 'PWMR', complianceType: 'Post registration', entityType: 'Importer', fy: '2025-26', periodicity: 'Qtr2', filingDate: '2026-04-22', delayDays: 0, status: 'pending' },
+      { id: 6, date: '2026-04-28', title: 'EWMR collection report', rule: 'EWMR', complianceType: 'Post registration', entityType: 'Producer', fy: '2024-25', periodicity: 'Qtr4', filingDate: '2026-03-01', delayDays: 150, status: 'overdue' },
+      { id: 7, date: '2026-05-14', title: 'PWMR audit pack', rule: 'PWMR', complianceType: 'Documentation', entityType: 'Producer', fy: '2025-26', periodicity: 'Annual', filingDate: '2026-05-14', delayDays: 0, status: 'future' },
+    ];
+
+    let viewDate = new Date();
+    let statusFilter = 'all';
+    let statusChart;
+    let trendChart;
+
+    function pad(n) { return n < 10 ? '0' + n : String(n); }
+    function ymd(d) {
+      return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    }
+
+    function eventsForDay(isoDate) {
+      return COMPLIANCE_EVENTS.filter(e => e.date === isoDate);
+    }
+
+    function matchesFilter(ev) {
+      if (statusFilter === 'all') return true;
+      return ev.status === statusFilter;
+    }
+
+    function updateKpis() {
+      const counts = { completed: 0, pending: 0, overdue: 0, not_due: 0, future: 0 };
+      COMPLIANCE_EVENTS.forEach(e => {
+        if (counts[e.status] !== undefined) counts[e.status]++;
+      });
+      document.getElementById('kpi-completed').textContent = counts.completed;
+      document.getElementById('kpi-pending').textContent = counts.pending;
+      document.getElementById('kpi-overdue').textContent = counts.overdue;
+      document.getElementById('kpi-total').textContent = COMPLIANCE_EVENTS.length;
+    }
+
+    function renderCalendar() {
+      const y = viewDate.getFullYear();
+      const m = viewDate.getMonth();
+      const first = new Date(y, m, 1);
+      const startPad = (first.getDay() + 6) % 7;
+      const daysInMonth = new Date(y, m + 1, 0).getDate();
+      const label = first.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+      document.getElementById('cal-month-label').textContent = label;
+
+      const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const grid = document.getElementById('cal-grid');
+      const today = new Date();
+      const todayIso = ymd(today);
+
+      let html = weekdays.map(w => `<div class="cal-weekday">${w}</div>`).join('');
+
+      const prevMonthDays = new Date(y, m, 0).getDate();
+      for (let i = 0; i < startPad; i++) {
+        const d = prevMonthDays - startPad + i + 1;
+        const cellDate = new Date(y, m - 1, d);
+        html += buildCell(cellDate, true, todayIso);
+      }
+      for (let d = 1; d <= daysInMonth; d++) {
+        const cellDate = new Date(y, m, d);
+        html += buildCell(cellDate, false, todayIso);
+      }
+      const cellsSoFar = startPad + daysInMonth;
+      const trailing = (7 - (cellsSoFar % 7)) % 7;
+      for (let i = 1; i <= trailing; i++) {
+        const cellDate = new Date(y, m + 1, i);
+        html += buildCell(cellDate, true, todayIso);
+      }
+
+      grid.innerHTML = html;
+
+      grid.querySelectorAll('.cal-cell').forEach(cell => {
+        cell.addEventListener('click', (e) => {
+          if (e.target.closest('.cal-event')) return;
+          const iso = cell.dataset.date;
+          if (cell.classList.contains('cal-cell--muted')) return;
+          openDayModal(iso);
+        });
+      });
+      grid.querySelectorAll('.cal-event').forEach(el => {
+        el.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const id = parseInt(el.dataset.id, 10);
+          const e = COMPLIANCE_EVENTS.find(x => x.id === id);
+          if (e) openEventModal(e);
+        });
+      });
+    }
+
+    function buildCell(cellDate, muted, todayIso) {
+      const iso = ymd(cellDate);
+      const isToday = iso === todayIso;
+      let cls = 'cal-cell';
+      if (muted) cls += ' cal-cell--muted';
+      if (isToday && !muted) cls += ' cal-cell--today';
+
+      const events = eventsForDay(iso).filter(matchesFilter).slice(0, 3);
+      const all = eventsForDay(iso).filter(matchesFilter);
+      const more = all.length > 3 ? all.length - 3 : 0;
+
+      const evHtml = events.map(e =>
+        `<div class="cal-event ev-${e.status}" data-id="${e.id}" title="${escapeAttr(e.title)}">${escapeHtml(e.title)}</div>`
+      ).join('');
+      const moreHtml = more > 0 ? `<div class="text-[0.65rem] font-semibold text-violet-600">+${more} more</div>` : '';
+
+      return `<div class="${cls}" data-date="${iso}"><span class="cal-daynum">${cellDate.getDate()}</span>${evHtml}${moreHtml}</div>`;
+    }
+
+    function escapeHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+    function escapeAttr(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    }
+
+    function statusPill(status) {
+      const map = {
+        completed: 'bg-emerald-100 text-emerald-800',
+        pending: 'bg-amber-100 text-amber-900',
+        overdue: 'bg-red-100 text-red-800',
+        not_due: 'bg-blue-100 text-blue-800',
+        future: 'bg-slate-200 text-slate-700'
+      };
+      const c = map[status] || map.future;
+      return `<span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold ${c}">${STATUS_LABELS[status] || status}</span>`;
+    }
+
+    function openEventModal(e) {
+      document.getElementById('modal-title').textContent = e.title;
+      document.getElementById('modal-body').innerHTML = eventDetailHtml(e);
+      document.getElementById('modal-overlay').classList.add('active');
+      document.getElementById('modal-content').classList.add('active');
+    }
+
+    function openDayModal(iso) {
+      const list = eventsForDay(iso).filter(matchesFilter);
+      const pretty = new Date(iso + 'T12:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      document.getElementById('modal-title').textContent = list.length ? `Tasks — ${pretty}` : `No tasks — ${pretty}`;
+      if (!list.length) {
+        document.getElementById('modal-body').innerHTML = '<p class="text-sm text-slate-600">No compliance items match your filters for this day.</p>';
+      } else {
+        document.getElementById('modal-body').innerHTML = list.map(e => `<div class="mb-4 rounded-xl border border-slate-100 bg-slate-50/80 p-4 last:mb-0">${eventDetailHtml(e)}</div>`).join('');
+      }
+      document.getElementById('modal-overlay').classList.add('active');
+      document.getElementById('modal-content').classList.add('active');
+    }
+
+    function eventDetailHtml(e) {
+      return `
+        <div class="flex flex-wrap items-start justify-between gap-2">
+          ${statusPill(e.status)}
+          <span class="text-xs text-slate-500">Due / filing: <strong class="text-slate-800">${e.filingDate}</strong></span>
+        </div>
+        <dl class="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+          <div><dt class="text-xs font-semibold uppercase text-slate-400">Rule</dt><dd class="text-slate-800">${escapeHtml(e.rule)}</dd></div>
+          <div><dt class="text-xs font-semibold uppercase text-slate-400">Compliance type</dt><dd class="text-slate-800">${escapeHtml(e.complianceType)}</dd></div>
+          <div><dt class="text-xs font-semibold uppercase text-slate-400">Entity type</dt><dd class="text-slate-800">${escapeHtml(e.entityType)}</dd></div>
+          <div><dt class="text-xs font-semibold uppercase text-slate-400">Financial year</dt><dd class="text-slate-800">${escapeHtml(e.fy)}</dd></div>
+          <div><dt class="text-xs font-semibold uppercase text-slate-400">Periodicity</dt><dd class="text-slate-800">${escapeHtml(e.periodicity)}</dd></div>
+          <div><dt class="text-xs font-semibold uppercase text-slate-400">Delays</dt><dd class="text-slate-800">${e.delayDays} days</dd></div>
+        </dl>
+        <button type="button" class="mt-4 w-full rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 py-3 text-sm font-semibold text-white shadow-md transition hover:from-violet-700 hover:to-purple-700 sm:w-auto sm:px-8" onclick="alert('Proof upload would open your document workflow.')">Upload proof</button>
+      `;
+    }
+
+    function closeDayModal() {
+      document.getElementById('modal-overlay').classList.remove('active');
+      document.getElementById('modal-content').classList.remove('active');
+    }
+
+    function initCharts() {
+      const completed = COMPLIANCE_EVENTS.filter(e => e.status === 'completed').length;
+      const pending = COMPLIANCE_EVENTS.filter(e => e.status === 'pending').length;
+      const overdue = COMPLIANCE_EVENTS.filter(e => e.status === 'overdue').length;
+      const notDue = COMPLIANCE_EVENTS.filter(e => e.status === 'not_due').length;
+      const future = COMPLIANCE_EVENTS.filter(e => e.status === 'future').length;
+
+      statusChart = new Chart(document.getElementById('chart-status'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Completed', 'Pending', 'Overdue', 'Not yet due', 'Upcoming'],
+          datasets: [{
+            data: [completed, pending, overdue, notDue, future].map(n => n || 0),
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#cbd5e1'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          cutout: '58%',
+          plugins: { legend: { display: false } },
+          maintainAspectRatio: false
+        }
+      });
+
+      trendChart = new Chart(document.getElementById('chart-trend'), {
+        type: 'line',
+        data: {
+          labels: ['Qtr1', 'Qtr2', 'Qtr3', 'Qtr4', 'Annual'],
+          datasets: [{
+            label: 'On-time index',
+            data: [82, 76, 88, 71, 85],
+            borderColor: '#059669',
+            backgroundColor: 'rgba(59, 130, 246, 0.12)',
+            tension: 0.4,
+            fill: true,
+            pointRadius: 4,
+            pointBackgroundColor: '#059669'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, max: 100, grid: { color: '#e2e8f0' } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function initPortalChrome() {
+      const mainMenu = document.getElementById('main-menu');
+      const menuToggle = document.querySelector('[data-toggle="main-menu"]');
+      if (menuToggle && mainMenu) {
+        menuToggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const isVisible = mainMenu.classList.contains('show');
+          mainMenu.classList.toggle('show');
+          const arrow = menuToggle.querySelector('svg:last-child');
+          if (arrow) arrow.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)';
+        });
+        document.addEventListener('click', (e) => {
+          if (!mainMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+            mainMenu.classList.remove('show');
+            const arrow = menuToggle.querySelector('svg:last-child');
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+          }
+        });
+      }
+
+      document.querySelectorAll('.epr-category-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.epr-category-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+        });
+      });
+
+      const fyBtn = document.getElementById('fiscal-year-btn');
+      const fyDropdown = document.getElementById('fiscal-year-dropdown');
+      if (fyBtn && fyDropdown) {
+        fyBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          fyDropdown.classList.toggle('hidden');
+        });
+        document.querySelectorAll('.fy-option').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const fy = btn.dataset.fy;
+            document.getElementById('fiscal-year-display').textContent = fy;
+            const hero = document.getElementById('hero-fy');
+            if (hero) hero.textContent = fy;
+            fyDropdown.classList.add('hidden');
+          });
+        });
+        document.addEventListener('click', (e) => {
+          if (!fyBtn.contains(e.target) && !fyDropdown.contains(e.target)) fyDropdown.classList.add('hidden');
+        });
+      }
+
+      document.getElementById('cal-prev').addEventListener('click', () => {
+        viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
+        renderCalendar();
+      });
+      document.getElementById('cal-next').addEventListener('click', () => {
+        viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
+        renderCalendar();
+      });
+      document.getElementById('cal-today').addEventListener('click', () => {
+        viewDate = new Date();
+        renderCalendar();
+      });
+
+      document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          statusFilter = chip.dataset.filter;
+          renderCalendar();
+        });
+      });
+
+      const lu = document.getElementById('last-updated');
+      if (lu) {
+        const d = new Date();
+        lu.textContent = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+    }
+
+    initPortalChrome();
+    updateKpis();
+    initCharts();
+    renderCalendar();
+  </script>
+</body>
+
+</html>
