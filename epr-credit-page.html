@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en" class="h-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EPR Credits Dashboard</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap"
+    rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          borderWidth: { 3: '3px' },
+          fontFamily: { sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: '#0f172a',
+            secondary: '#1e293b',
+            accent: '#3b82f6',
+            success: '#10b981',
+            warning: '#f59e0b',
+            danger: '#ef4444',
+            surface: '#f8fafc',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    .app-wrapper { min-height: 100%; width: 100%; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    .dashboard-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .dashboard-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+
+    .credit-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .credit-table thead th {
+      background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #6d28d9 100%);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 12px 14px;
+      text-align: left;
+    }
+    .credit-table thead th:first-child { border-radius: 8px 0 0 0; }
+    .credit-table thead th:last-child { border-radius: 0 8px 0 0; }
+    .credit-table tbody td {
+      padding: 12px 14px;
+      font-size: 0.875rem;
+      color: #334155;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .credit-table tbody tr:hover { background: #faf5ff; }
+    .credit-table tfoot td {
+      font-weight: 700;
+      padding: 14px;
+      background: #f8fafc;
+      border-top: 2px solid #e9d5ff;
+    }
+
+    .validity-table { width: 100%; border-collapse: collapse; }
+    .validity-table thead th {
+      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+      color: #fff;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      padding: 12px 14px;
+      text-align: left;
+    }
+    .validity-table tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.875rem;
+    }
+
+    .pill-cat {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .pill-proc {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .year-tab {
+      padding: 8px 18px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #64748b;
+      background: #f1f5f9;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .year-tab:hover { background: #e2e8f0; color: #334155; }
+    .year-tab.active {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal-content {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      z-index: 1001;
+      max-width: 90vw;
+      max-height: 85%;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .modal-content.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up { animation: fadeInUp 0.4s ease forwards; }
+
+    body { box-sizing: border-box; }
+  </style>
+</head>
+
+<body class="h-full bg-slate-100">
+  <div class="app-wrapper flex min-h-full w-full flex-col">
+    <header class="z-20 flex-shrink-0 bg-white shadow-md">
+      <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+        <div class="flex flex-wrap items-center gap-4 sm:gap-6">
+          <div class="flex items-center space-x-4">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-green-400 to-emerald-600">
+              <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+              </svg>
+            </div>
+            <div>
+              <h1 id="dashboard-title" class="text-xl font-bold leading-tight text-gray-800">EPR Credits Dashboard</h1>
+              <p id="company-name" class="text-xs text-gray-500">Monitor and manage Extended Producer Responsibility credits</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2 rounded-lg bg-gray-100 p-1">
+            <button type="button" class="epr-category-tab active rounded-md px-4 py-2 text-sm font-semibold transition-all sm:px-6" data-category="pwmr">PWMR</button>
+            <button type="button" class="epr-category-tab rounded-md px-4 py-2 text-sm font-semibold transition-all sm:px-6" data-category="bwmr">BWMR</button>
+            <button type="button" class="epr-category-tab rounded-md px-4 py-2 text-sm font-semibold transition-all sm:px-6" data-category="ewmr">EWMR</button>
+          </div>
+        </div>
+        <div class="flex flex-shrink-0 items-center gap-2 sm:gap-4">
+          <div class="hidden text-right text-xs text-gray-500 sm:block">
+            <span class="block text-gray-400">Last updated</span>
+            <span id="last-updated" class="font-semibold text-gray-800">27 Jun 2025</span>
+          </div>
+          <button type="button" onclick="refreshTimestamp()" class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700" title="Refresh">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+          <div class="relative">
+            <button id="fiscal-year-btn" type="button"
+              class="flex items-center gap-2 rounded-lg border-2 border-gray-200 bg-gray-50 px-3 py-2 text-sm transition-colors hover:border-green-500 focus:outline-none sm:px-4">
+              <div>
+                <span class="text-xs text-gray-500">Fiscal Year</span>
+                <span class="block text-sm font-semibold text-gray-900" id="fiscal-year-display">2024-25</span>
+              </div>
+              <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </button>
+            <div id="fiscal-year-dropdown"
+              class="absolute right-0 top-full z-40 mt-2 hidden min-w-max rounded-lg border border-gray-200 bg-white shadow-lg">
+              <button type="button" class="fy-option w-full rounded-t-lg px-4 py-2 text-left text-sm font-semibold text-gray-900 hover:bg-gray-50" data-fy="2024-25">2024-25 (Current)</button>
+              <button type="button" class="fy-option w-full px-4 py-2 text-left text-sm text-gray-600 hover:bg-gray-50" data-fy="2023-24">2023-24</button>
+              <button type="button" class="fy-option w-full px-4 py-2 text-left text-sm text-gray-600 hover:bg-gray-50" data-fy="2022-23">2022-23</button>
+              <button type="button" class="fy-option w-full rounded-b-lg px-4 py-2 text-left text-sm text-gray-600 hover:bg-gray-50" data-fy="2021-22">2021-22</button>
+            </div>
+          </div>
+          <div class="hidden rounded-lg border border-green-200 bg-green-50 px-3 py-2 sm:block">
+            <span class="text-xs text-green-700">Status</span>
+            <span class="block text-sm font-semibold text-green-800">Compliant</span>
+          </div>
+          <button type="button" class="rounded-lg p-2 transition-colors hover:bg-gray-100">
+            <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+          </button>
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-emerald-600">
+            <span class="text-sm font-semibold text-white">AD</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="bg-gradient-to-r from-slate-800 to-slate-700 px-6">
+        <div class="flex flex-wrap items-center gap-x-1 gap-y-0">
+          <a href="index.html#home-section" class="nav-item flex cursor-pointer items-center space-x-2 border-b-3 border-transparent px-4 py-4 text-white hover:bg-white hover:bg-opacity-10 no-underline sm:px-6">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg><span class="whitespace-nowrap text-sm font-medium">Home Dashboard</span>
+          </a>
+          <a href="index.html#leadership-section" class="nav-item flex cursor-pointer items-center space-x-2 border-b-3 border-transparent px-4 py-4 text-white hover:bg-white hover:bg-opacity-10 no-underline sm:px-6">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg><span class="whitespace-nowrap text-sm font-medium">Leadership All EPR Dashboard</span>
+          </a>
+          <a href="index.html#calendar-section" class="nav-item flex cursor-pointer items-center space-x-2 border-b-3 border-transparent px-4 py-4 text-white hover:bg-white hover:bg-opacity-10 no-underline sm:px-6">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg><span class="whitespace-nowrap text-sm font-medium">Compliance Calendar</span>
+          </a>
+          <div class="nav-parent relative">
+            <div class="nav-item flex cursor-pointer items-center space-x-2 border-b-3 border-transparent px-4 py-4 text-white hover:bg-white hover:bg-opacity-10 sm:px-6" data-toggle="main-menu">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+              <span class="whitespace-nowrap text-sm font-medium">Menu</span>
+              <svg class="h-4 w-4 transform transition-transform" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </div>
+            <div class="submenu-horizontal absolute left-0 top-full z-30 min-w-[280px] rounded-b-lg bg-slate-800 shadow-lg" id="main-menu">
+              <a href="epr-compliance-dashboard.html" class="nav-item block w-full cursor-pointer px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">EPR Compliance Dashboard</a>
+              <a href="epr-purchase.html" class="nav-item block w-full cursor-pointer px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">EPR Purchase</a>
+              <a href="epr-consumption-dashboard.html" class="nav-item block w-full cursor-pointer px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">EPR Consumption</a>
+              <a href="epr-credit-page.html" class="nav-item block w-full cursor-pointer bg-white/10 px-4 py-3 text-left font-semibold text-white no-underline">EPR Credits</a>
+              <a href="epr-account-wise.html" class="nav-item block w-full cursor-pointer px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">Account Wise View</a>
+              <a href="index.html#real-time-section" class="nav-item block w-full cursor-pointer rounded-b-lg px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">Real Time Data Status</a>
+            </div>
+          </div>
+          <div class="mx-2 hidden h-6 w-px bg-gray-600 sm:block"></div>
+          <a href="index.html#ai-insights-section" class="nav-item flex cursor-pointer items-center space-x-2 border-b-3 border-transparent px-4 py-4 text-white hover:bg-white hover:bg-opacity-10 no-underline sm:px-6">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+            <span class="whitespace-nowrap text-sm font-medium">AI Insights</span>
+          </a>
+          <a href="index.html#ai-copilot-section" class="nav-item flex cursor-pointer items-center space-x-2 border-b-3 border-transparent px-4 py-4 text-white hover:bg-white hover:bg-opacity-10 no-underline sm:px-6">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+            <span class="whitespace-nowrap text-sm font-medium">AI Copilot</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="border-b border-gray-200 bg-gray-50 px-6 py-3">
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <div class="flex items-center space-x-3">
+            <label for="group-filter" class="whitespace-nowrap text-sm font-medium text-gray-700">Group:</label>
+            <select id="group-filter" class="min-w-[180px] rounded-lg border-2 border-gray-200 bg-white px-4 py-2 text-sm focus:border-green-500 focus:outline-none sm:min-w-[200px]">
+              <option value="all">All Groups</option>
+              <option value="global">Global Enterprises Ltd</option>
+              <option value="asia">Asia Pacific Group</option>
+              <option value="india">India Operations</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-3">
+            <label for="entity-filter" class="whitespace-nowrap text-sm font-medium text-gray-700">Entity:</label>
+            <select id="entity-filter" class="min-w-[200px] rounded-lg border-2 border-gray-200 bg-white px-4 py-2 text-sm focus:border-green-500 focus:outline-none sm:min-w-[240px]">
+              <option value="all">All Legal Entities</option>
+              <option value="manufacturing">Manufacturing Unit - Delhi</option>
+              <option value="distribution">Distribution Hub - Mumbai</option>
+              <option value="processing">Processing Center - Bangalore</option>
+              <option value="retail">Retail Operations - Chennai</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-3">
+            <label for="user-filter" class="whitespace-nowrap text-sm font-medium text-gray-700">User View:</label>
+            <select id="user-filter" class="min-w-[160px] rounded-lg border-2 border-gray-200 bg-white px-4 py-2 text-sm focus:border-green-500 focus:outline-none sm:min-w-[180px]">
+              <option value="aggregated">Aggregated View</option>
+              <option value="individual">Individual View</option>
+              <option value="manager">Manager View</option>
+              <option value="admin">Admin View</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-3">
+            <label for="custom-filter" class="whitespace-nowrap text-sm font-semibold text-gray-700">Custom View:</label>
+            <select id="custom-filter" class="min-w-[180px] rounded-lg border-2 border-green-300 bg-white px-4 py-2 text-sm font-medium shadow-sm focus:border-green-500 focus:outline-none sm:min-w-[200px]">
+              <option value="all">All Views</option>
+              <option value="hub">Hub View</option>
+              <option value="location">Location View</option>
+              <option value="regional">Regional View</option>
+              <option value="department">Department View</option>
+              <option value="project">Project View</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto w-full max-w-7xl flex-1 space-y-6 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+      <!-- Alert -->
+      <div class="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900 animate-fade-in-up" style="animation-delay:0.02s">
+        <svg class="mt-0.5 h-5 w-5 shrink-0 text-rose-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <p><span class="font-semibold">Credit is expiring soon!</span> View your credit validity details in the table below.</p>
+      </div>
+
+      <!-- Category summary cards -->
+      <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-fade-in-up" style="animation-delay:0.05s" id="category-cards"></section>
+
+      <!-- Charts -->
+      <section class="grid grid-cols-1 gap-6 xl:grid-cols-2 animate-fade-in-up" style="animation-delay:0.08s">
+        <div class="dashboard-card p-5">
+          <h2 class="text-lg font-bold text-slate-900">Category Distribution</h2>
+          <p class="text-xs text-slate-500">Credit balance by PWM category</p>
+          <div class="mx-auto mt-4 h-64 max-w-xs"><canvas id="chart-donut"></canvas></div>
+          <div class="mt-3 flex flex-wrap justify-center gap-3 text-xs text-slate-600">
+            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-pink-500"></span> Cat I</span>
+            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span> Cat II</span>
+            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-blue-500"></span> Cat III</span>
+            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-violet-500"></span> Cat IV</span>
+          </div>
+        </div>
+        <div class="dashboard-card p-5">
+          <h2 class="text-lg font-bold text-slate-900">Inward vs Outward Flow</h2>
+          <p class="text-xs text-slate-500">Monthly credits received vs utilized (tonnes)</p>
+          <div class="mt-4 h-72"><canvas id="chart-bar"></canvas></div>
+        </div>
+      </section>
+
+      <!-- Required filters -->
+      <section class="dashboard-card p-5 animate-fade-in-up" style="animation-delay:0.1s">
+        <div class="flex items-center gap-2">
+          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+          </div>
+          <h2 class="text-lg font-bold text-slate-900">Required Filters</h2>
+        </div>
+        <form id="credit-filter-form" class="mt-4 space-y-4" onsubmit="event.preventDefault(); applyCreditFilters();">
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div>
+              <label class="mb-1 block text-xs font-semibold text-slate-600" for="cf-fy">Financial Year</label>
+              <select id="cf-fy" class="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none">
+                <option>2024-25</option><option>2023-24</option><option>2022-23</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-semibold text-slate-600" for="cf-entity">Entity Name</label>
+              <input id="cf-entity" type="text" placeholder="Search entity" class="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none" />
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-semibold text-slate-600" for="cf-sub">Sub Entity Name</label>
+              <input id="cf-sub" type="text" placeholder="Sub entity" class="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none" />
+            </div>
+          </div>
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div>
+              <label class="mb-1 block text-xs font-semibold text-slate-600" for="cf-epr">EPR Type</label>
+              <select id="cf-epr" class="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none">
+                <option>All</option><option>PWMR</option><option>BWMR</option><option>EWMR</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-semibold text-slate-600" for="cf-etype">Entity Type</label>
+              <select id="cf-etype" class="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none">
+                <option>All</option><option>Producer</option><option>Importer</option><option>Brand Owner</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-semibold text-slate-600" for="cf-loc">Unit Location</label>
+              <input id="cf-loc" type="text" placeholder="City / State" class="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none" />
+            </div>
+          </div>
+          <div class="flex flex-wrap justify-end gap-3 pt-2">
+            <button type="button" onclick="document.getElementById('credit-filter-form').reset();" class="rounded-lg border-2 border-gray-200 bg-slate-50 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Reset</button>
+            <button type="submit" class="rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:from-violet-500 hover:to-indigo-500">Apply Filters</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Inward -->
+      <section class="dashboard-card overflow-hidden animate-fade-in-up" style="animation-delay:0.11s">
+        <div class="border-b border-slate-200 px-5 py-4">
+          <h2 class="text-lg font-bold text-slate-900">Credit Transactions (Inward)</h2>
+        </div>
+        <div class="overflow-x-auto p-4 sm:p-5">
+          <div class="rounded-xl border border-slate-200">
+            <table class="credit-table">
+              <thead><tr><th>Date</th><th>Transaction ID</th><th>PWM Name</th><th>Category</th><th>Processing Type</th><th>Credit Received (kg)</th></tr></thead>
+              <tbody id="tbody-inward"></tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="5" class="text-right text-slate-600">Total Credit Received</td>
+                  <td class="font-bold text-emerald-700" id="foot-in-total">0</td>
+                </tr>
+                <tr>
+                  <td colspan="5" class="text-right text-slate-600">Total Credit Reviewed</td>
+                  <td class="font-bold text-emerald-700" id="foot-in-reviewed">0</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Outward -->
+      <section class="dashboard-card overflow-hidden animate-fade-in-up" style="animation-delay:0.12s">
+        <div class="border-b border-slate-200 px-5 py-4">
+          <h2 class="text-lg font-bold text-slate-900">Debit Transactions (Outward)</h2>
+        </div>
+        <div class="overflow-x-auto p-4 sm:p-5">
+          <div class="rounded-xl border border-slate-200">
+            <table class="credit-table">
+              <thead><tr><th>Date</th><th>Transaction ID</th><th>Action</th><th>Category</th><th>Processing Type</th><th>Credit Used (kg)</th></tr></thead>
+              <tbody id="tbody-outward"></tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="5" class="text-right text-slate-600">Total Credit Used</td>
+                  <td class="font-bold text-rose-600" id="foot-out-total">0</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Validity -->
+      <section class="dashboard-card overflow-hidden animate-fade-in-up" style="animation-delay:0.13s">
+        <div class="border-b border-slate-200 px-5 py-4">
+          <h2 class="text-lg font-bold text-slate-900">Credit Validity &amp; Planning</h2>
+          <p class="mt-1 text-xs text-slate-500">Select a validity year to view scheduled credit availability</p>
+        </div>
+        <div class="flex flex-wrap gap-2 border-b border-slate-100 px-5 py-4" id="year-tabs"></div>
+        <div class="p-5">
+          <h3 class="text-sm font-bold text-slate-800">Credit by Validity Year — <span id="validity-year-label">2025</span></h3>
+          <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200">
+            <table class="validity-table">
+              <thead><tr><th>Category</th><th>Opening Balance</th><th>Expiry Date</th><th>Status</th></tr></thead>
+              <tbody id="tbody-validity"></tbody>
+            </table>
+          </div>
+          <div id="validity-empty" class="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <span class="font-semibold">No records found</span> for the selected year.
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer quick cards -->
+      <section class="grid grid-cols-1 gap-4 md:grid-cols-3 animate-fade-in-up" style="animation-delay:0.14s">
+        <div class="dashboard-card p-5">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-bold text-slate-900">Market Rate</h3>
+              <p class="mt-1 text-xs text-slate-500">Latest PWM credit reference rates</p>
+              <button type="button" onclick="openModal('Market rate','<p class=\\'text-slate-600 text-sm\\'>Connect to live pricing feed or CPCB reference.</p>')" class="mt-3 text-sm font-semibold text-violet-600 hover:text-violet-700">View Details →</button>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-card p-5">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-700">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-bold text-slate-900">CPCB Dashboard</h3>
+              <p class="mt-1 text-xs text-slate-500">Sync with central registry</p>
+              <button type="button" onclick="refreshTimestamp(); openModal('CPCB','<p class=\\'text-slate-600 text-sm\\'>Last sync timestamp updated.</p>')" class="mt-3 text-sm font-semibold text-sky-600 hover:text-sky-700">Refresh →</button>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-card p-5">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-bold text-slate-900">Total Available</h3>
+              <p class="mt-1 text-2xl font-bold text-slate-900">42,180 <span class="text-sm font-normal text-slate-500">kg</span></p>
+              <button type="button" onclick="openModal('Export','<p class=\\'text-slate-600 text-sm\\'>CSV export would download here.</p>')" class="mt-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700">Export →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="mt-8 bg-slate-900 py-6 text-slate-400">
+      <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+        <p class="text-sm">© 2024 EPR Portal. All rights reserved.</p>
+      </div>
+    </footer>
+  </div>
+
+  <div id="modal-overlay" class="modal-overlay" onclick="closeModal()"></div>
+  <div id="modal-content" class="modal-content" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-4 text-white">
+      <h3 id="modal-title" class="text-lg font-bold">Details</h3>
+      <button type="button" onclick="closeModal()" class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div id="modal-body" class="max-h-96 overflow-auto p-6"></div>
+  </div>
+
+  <script>
+    const categorySummaries = [
+      { title: 'Cat-I Rigid', accent: 'border-l-4 border-pink-500', lines: [['Recycling', '4,200'], ['Co-processing', '1,850'], ['Waste to energy', '620'], ['Total', '6,670']] },
+      { title: 'Cat-II Flexible', accent: 'border-l-4 border-emerald-500', lines: [['Recycling', '8,100'], ['Co-processing', '2,400'], ['Total', '10,500']] },
+      { title: 'Cat-III', accent: 'border-l-4 border-blue-500', lines: [['Recycling', '12,400'], ['Co-processing', '3,200'], ['Total', '15,600']] },
+      { title: 'Cat-IV', accent: 'border-l-4 border-violet-500', lines: [['Recycling', '5,800'], ['Co-processing', '1,100'], ['Total', '6,900']] },
+    ];
+
+    function renderCategoryCards() {
+      document.getElementById('category-cards').innerHTML = categorySummaries.map(c => `
+        <div class="dashboard-card overflow-hidden ${c.accent}">
+          <div class="border-b border-slate-100 px-4 py-3">
+            <h3 class="font-bold text-slate-900">${c.title}</h3>
+          </div>
+          <ul class="divide-y divide-slate-100 px-4 py-2 text-sm">
+            ${c.lines.map(([k, v], i) => `
+              <li class="flex justify-between py-2 ${i === c.lines.length - 1 ? 'font-bold text-slate-900' : 'text-slate-600'}">
+                <span>${k}</span><span>${v} kg</span>
+              </li>`).join('')}
+          </ul>
+        </div>`).join('');
+    }
+
+    const inwardRows = [
+      { d: '2025-06-12', id: 'IN-TXN-88421', pwm: 'GreenCycle PWM Ltd', cat: 'Cat I', proc: 'Recycling', kg: 2400 },
+      { d: '2025-06-10', id: 'IN-TXN-88405', pwm: 'EcoProcess India', cat: 'Cat II', proc: 'Co-processing', kg: 1820 },
+      { d: '2025-06-08', id: 'IN-TXN-88391', pwm: 'North Recycler', cat: 'Cat III', proc: 'Recycling', kg: 3100 },
+      { d: '2025-06-05', id: 'IN-TXN-88372', pwm: 'Metro Waste PWM', cat: 'Cat I', proc: 'Waste to energy', kg: 950 },
+    ];
+
+    const outwardRows = [
+      { d: '2025-06-11', id: 'OUT-TXN-55201', act: 'Compliance offset', cat: 'Cat II', proc: 'Recycling', kg: 1200 },
+      { d: '2025-06-09', id: 'OUT-TXN-55188', act: 'Transfer', cat: 'Cat I', proc: 'Co-processing', kg: 800 },
+      { d: '2025-06-07', id: 'OUT-TXN-55170', act: 'QTR filing', cat: 'Cat III', proc: 'Recycling', kg: 2100 },
+    ];
+
+    function renderTables() {
+      let sumIn = 0, sumOut = 0;
+      document.getElementById('tbody-inward').innerHTML = inwardRows.map(r => {
+        sumIn += r.kg;
+        return `<tr>
+          <td>${r.d}</td><td class="font-mono text-xs">${r.id}</td><td>${r.pwm}</td>
+          <td><span class="pill-cat">${r.cat}</span></td><td><span class="pill-proc">${r.proc}</span></td>
+          <td class="font-semibold">${r.kg.toLocaleString()}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('foot-in-total').textContent = sumIn.toLocaleString();
+      document.getElementById('foot-in-reviewed').textContent = sumIn.toLocaleString();
+
+      document.getElementById('tbody-outward').innerHTML = outwardRows.map(r => {
+        sumOut += r.kg;
+        return `<tr>
+          <td>${r.d}</td><td class="font-mono text-xs">${r.id}</td><td>${r.act}</td>
+          <td><span class="pill-cat">${r.cat}</span></td><td><span class="pill-proc">${r.proc}</span></td>
+          <td class="font-semibold">${r.kg.toLocaleString()}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('foot-out-total').textContent = sumOut.toLocaleString();
+    }
+
+    const validityYears = [2025, 2026, 2027, 2028, 2029, 2030];
+    let selectedValidityYear = 2025;
+
+    function renderYearTabs() {
+      document.getElementById('year-tabs').innerHTML = validityYears.map(y => `
+        <button type="button" class="year-tab ${y === selectedValidityYear ? 'active' : ''}" data-year="${y}">${y}</button>
+      `).join('');
+      document.querySelectorAll('#year-tabs .year-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedValidityYear = +btn.dataset.year;
+          document.querySelectorAll('#year-tabs .year-tab').forEach(b => b.classList.toggle('active', +b.dataset.year === selectedValidityYear));
+          document.getElementById('validity-year-label').textContent = selectedValidityYear;
+          renderValidityBody();
+        });
+      });
+    }
+
+    function renderValidityBody() {
+      const tb = document.getElementById('tbody-validity');
+      const empty = document.getElementById('validity-empty');
+      if (selectedValidityYear === 2026) {
+        tb.innerHTML = `
+          <tr><td>Cat I</td><td>2,400</td><td>31 Mar ${selectedValidityYear}</td><td><span class="pill-proc">Active</span></td></tr>
+          <tr><td>Cat II</td><td>1,800</td><td>15 Jun ${selectedValidityYear}</td><td><span class="pill-proc">Active</span></td></tr>`;
+        empty.classList.add('hidden');
+      } else {
+        tb.innerHTML = '';
+        empty.classList.remove('hidden');
+      }
+    }
+
+    function initCharts() {
+      new Chart(document.getElementById('chart-donut'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Cat I', 'Cat II', 'Cat III', 'Cat IV'],
+          datasets: [{ data: [6670, 10500, 15600, 6900], backgroundColor: ['#ec4899', '#10b981', '#3b82f6', '#8b5cf6'], borderWidth: 0 }]
+        },
+        options: { cutout: '58%', plugins: { legend: { display: false } }, maintainAspectRatio: false }
+      });
+      new Chart(document.getElementById('chart-bar'), {
+        type: 'bar',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+          datasets: [
+            { label: 'Inward Credits', data: [2.1, 2.4, 2.8, 3.0, 3.2, 3.4], backgroundColor: '#14b8a6', borderRadius: 6 },
+            { label: 'Outward Flow', data: [1.2, 1.5, 1.4, 1.8, 2.0, 2.1], backgroundColor: '#f472b6', borderRadius: 6 },
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } },
+          scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#e2e8f0' } } }
+        }
+      });
+    }
+
+    function openModal(title, html) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-body').innerHTML = html;
+      document.getElementById('modal-overlay').classList.add('active');
+      document.getElementById('modal-content').classList.add('active');
+    }
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('active');
+      document.getElementById('modal-content').classList.remove('active');
+    }
+
+    function refreshTimestamp() {
+      document.getElementById('last-updated').textContent = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function applyCreditFilters() {
+      refreshTimestamp();
+    }
+
+    function initPortalChrome() {
+      const mainMenu = document.getElementById('main-menu');
+      const menuToggle = document.querySelector('[data-toggle="main-menu"]');
+      if (menuToggle && mainMenu) {
+        menuToggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const open = mainMenu.classList.contains('show');
+          mainMenu.classList.toggle('show');
+          const arrow = menuToggle.querySelector('svg:last-child');
+          if (arrow) arrow.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+        });
+        document.addEventListener('click', (e) => {
+          if (!mainMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+            mainMenu.classList.remove('show');
+            const arrow = menuToggle.querySelector('svg:last-child');
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+          }
+        });
+      }
+      document.querySelectorAll('.epr-category-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.epr-category-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+        });
+      });
+      const fyBtn = document.getElementById('fiscal-year-btn');
+      const fyDropdown = document.getElementById('fiscal-year-dropdown');
+      if (fyBtn && fyDropdown) {
+        fyBtn.addEventListener('click', (e) => { e.stopPropagation(); fyDropdown.classList.toggle('hidden'); });
+        document.querySelectorAll('.fy-option').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.getElementById('fiscal-year-display').textContent = btn.dataset.fy;
+            fyDropdown.classList.add('hidden');
+            document.querySelectorAll('.fy-option').forEach(b => {
+              b.classList.remove('text-gray-900', 'font-semibold');
+              b.classList.add('text-gray-600');
+            });
+            btn.classList.remove('text-gray-600');
+            btn.classList.add('text-gray-900', 'font-semibold');
+          });
+        });
+        document.addEventListener('click', (e) => {
+          if (!fyBtn.contains(e.target) && !fyDropdown.contains(e.target)) fyDropdown.classList.add('hidden');
+        });
+      }
+    }
+
+    initPortalChrome();
+    renderCategoryCards();
+    renderTables();
+    renderYearTabs();
+    renderValidityBody();
+    initCharts();
+  </script>
+</body>
+</html>

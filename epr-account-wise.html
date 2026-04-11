@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EPR Consumption — Sales Analytics</title>
+  <title>AC Wise Performance — Account View</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap"
@@ -40,38 +40,71 @@
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-    .data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-    .data-table th {
-      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-      color: white;
-      font-weight: 600;
-      padding: 12px 16px;
+    .dashboard-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .dashboard-card:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .account-card-head {
+      background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 55%, #6d28d9 100%);
+      color: #fff;
+    }
+
+    .account-mini-table { width: 100%; border-collapse: collapse; }
+    .account-mini-table th {
+      background: #f8fafc;
       text-align: left;
-      font-size: 0.75rem;
+      padding: 10px 12px;
+      font-weight: 600;
+      font-size: 0.65rem;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .data-table th:first-child { border-radius: 8px 0 0 0; }
-    .data-table th:last-child { border-radius: 0 8px 0 0; }
-    .data-table td {
-      padding: 12px 16px;
+      letter-spacing: 0.04em;
+      color: #64748b;
       border-bottom: 1px solid #e2e8f0;
-      font-size: 0.875rem;
+    }
+    .account-mini-table td {
+      padding: 10px 12px;
+      font-size: 0.8125rem;
       color: #334155;
+      border-bottom: 1px solid #f1f5f9;
     }
-    .data-table tbody tr { transition: background 0.15s ease; }
-    .data-table tbody tr:hover { background: #f1f5f9; }
-    .data-table tbody tr.total-row {
-      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    .account-mini-table tbody tr:last-child td { border-bottom: none; }
+    .account-mini-table .total-row td {
       font-weight: 700;
-    }
-    .data-table tbody tr.total-row td {
-      border-top: 2px solid #3b82f6;
+      background: #f0f9ff;
       color: #0f172a;
+      border-top: 2px solid #3b82f6;
     }
+
+    .acct-status {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: 9999px;
+    }
+    .acct-status-done { background: rgba(16, 185, 129, 0.25); color: #a7f3d0; }
+    .acct-status-overdue { background: rgba(239, 68, 68, 0.3); color: #fecaca; }
+    .acct-status-pending { background: rgba(245, 158, 11, 0.35); color: #fde68a; }
+
+    .dev-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .dev-pos { background: #d1fae5; color: #065f46; }
+    .dev-neg { background: #fee2e2; color: #991b1b; }
+    .dev-warn { background: #fef3c7; color: #92400e; }
+    .dev-zero { background: #f1f5f9; color: #64748b; }
 
     .modal-overlay {
       position: fixed;
@@ -106,47 +139,6 @@
       transform: translate(-50%, -50%) scale(1);
     }
 
-    .action-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      color: white;
-      transition: all 0.2s;
-      cursor: pointer;
-      border: none;
-    }
-    .action-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-    }
-
-    .dashboard-card {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-      overflow: hidden;
-      transition: all 0.2s;
-    }
-    .dashboard-card:hover {
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    .status-compliant { background: #d1fae5; color: #065f46; }
-    .status-warning { background: #fef3c7; color: #92400e; }
-    .status-deficit { background: #fee2e2; color: #991b1b; }
-
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -171,8 +163,8 @@
               </svg>
             </div>
             <div>
-              <h1 id="dashboard-title" class="text-xl font-bold leading-tight text-gray-800">EPR Consumption</h1>
-              <p id="company-name" class="text-xs text-gray-500">Sales Analytics &amp; Distribution Management</p>
+              <h1 id="dashboard-title" class="text-xl font-bold leading-tight text-gray-800">AC Wise Performance Dashboard</h1>
+              <p id="company-name" class="text-xs text-gray-500">Monitor and analyze AC performance metrics across all categories</p>
             </div>
           </div>
           <div class="flex items-center space-x-2 rounded-lg bg-gray-100 p-1">
@@ -184,11 +176,18 @@
               data-category="ewmr">EWMR</button>
           </div>
         </div>
-        <div class="flex flex-shrink-0 items-center gap-3 sm:gap-4">
+        <div class="flex flex-shrink-0 items-center gap-2 sm:gap-4">
           <div class="hidden text-right text-xs text-gray-500 sm:block">
             <span class="block text-gray-400">Last updated</span>
             <span id="last-updated" class="font-semibold text-gray-800">27 Jun 2025</span>
           </div>
+          <button type="button" onclick="refreshTimestamp()" class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+            title="Refresh">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
           <div class="relative">
             <button id="fiscal-year-btn" type="button"
               class="flex items-center gap-2 rounded-lg border-2 border-gray-200 bg-gray-50 px-3 py-2 text-sm transition-colors hover:border-green-500 focus:outline-none sm:px-4">
@@ -275,13 +274,13 @@
                 class="nav-item block w-full cursor-pointer px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">EPR
                 Purchase</a>
               <a href="epr-consumption-dashboard.html"
-                class="nav-item block w-full cursor-pointer bg-white/10 px-4 py-3 text-left font-semibold text-white no-underline">EPR
+                class="nav-item block w-full cursor-pointer px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">EPR
                 Consumption</a>
               <a href="epr-credit-page.html"
                 class="nav-item block w-full cursor-pointer px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">EPR
                 Credits</a>
               <a href="epr-account-wise.html"
-                class="nav-item block w-full cursor-pointer px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">Account
+                class="nav-item block w-full cursor-pointer bg-white/10 px-4 py-3 text-left font-semibold text-white no-underline">Account
                 Wise View</a>
               <a href="index.html#real-time-section"
                 class="nav-item block w-full cursor-pointer rounded-b-lg px-4 py-3 text-left text-gray-300 no-underline hover:bg-white hover:bg-opacity-10 hover:text-white">Real
@@ -357,60 +356,60 @@
 
     <main class="mx-auto w-full max-w-7xl flex-1 space-y-6 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
       <!-- KPIs -->
-      <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 animate-fade-in-up lg:grid-cols-4" style="animation-delay:0.05s">
+      <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-fade-in-up" style="animation-delay:0.05s">
         <div class="dashboard-card p-5">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-slate-500">Total Sales (2024-25)</p>
-              <p class="mt-1 text-3xl font-bold text-slate-900">656.45</p>
+          <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-100">
+              <svg class="h-7 w-7 text-blue-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
             </div>
-            <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-100">
+            <div>
+              <p class="text-3xl font-bold text-slate-900">12</p>
+              <p class="text-sm font-medium text-slate-500">Total ACs</p>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-card p-5">
+          <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-teal-100">
+              <svg class="h-7 w-7 text-teal-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-3xl font-bold text-slate-900">117K</p>
+              <p class="text-sm font-medium text-slate-500">Total Target</p>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-card p-5">
+          <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-emerald-100">
               <svg class="h-7 w-7 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
+            </div>
+            <div>
+              <p class="text-3xl font-bold text-slate-900">16.6K</p>
+              <p class="text-sm font-medium text-slate-500">Total Achieved</p>
             </div>
           </div>
         </div>
         <div class="dashboard-card p-5">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-slate-500">Recycled Content (%)</p>
-              <p class="mt-1 text-3xl font-bold text-slate-900">0</p>
-            </div>
-            <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-sky-100">
-              <svg class="h-7 w-7 text-sky-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-orange-100">
+              <svg class="h-7 w-7 text-orange-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </div>
-          </div>
-        </div>
-        <div class="dashboard-card p-5">
-          <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-slate-500">Export Quantity</p>
-              <p class="mt-1 text-3xl font-bold text-slate-900">0</p>
-            </div>
-            <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-pink-100">
-              <svg class="h-7 w-7 text-pink-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-              </svg>
-            </div>
-          </div>
-        </div>
-        <div class="dashboard-card p-5">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-slate-500">Active Categories</p>
-              <p class="mt-1 text-3xl font-bold text-slate-900">4</p>
-            </div>
-            <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-amber-100">
-              <svg class="h-7 w-7 text-amber-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z" />
-              </svg>
+              <p class="text-3xl font-bold text-slate-900">142%</p>
+              <p class="text-sm font-medium text-slate-500">Avg Performance</p>
             </div>
           </div>
         </div>
@@ -419,197 +418,31 @@
       <!-- Charts -->
       <section class="grid grid-cols-1 gap-6 xl:grid-cols-2 animate-fade-in-up" style="animation-delay:0.1s">
         <div class="dashboard-card p-5">
-          <h2 class="text-lg font-bold text-slate-900">Sales Distribution by Category</h2>
-          <p class="text-xs text-slate-500">Share of sales volume across EEE categories</p>
+          <h2 class="text-lg font-bold text-slate-900">AC Performance Distribution</h2>
+          <p class="text-xs text-slate-500">Share of accounts by performance band</p>
           <div class="mx-auto mt-4 h-64 max-w-xs">
             <canvas id="chart-donut"></canvas>
           </div>
-          <div class="mt-4 flex flex-wrap justify-center gap-4 text-xs text-slate-600">
-            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-blue-500"></span> Cat I</span>
-            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span> Cat II</span>
-            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-pink-500"></span> Cat III</span>
-            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-teal-500"></span> Cat IV</span>
-          </div>
+          <ul class="mt-4 space-y-2 text-xs text-slate-600">
+            <li class="flex items-center gap-2"><span class="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500"></span> Excellent (&gt;150%)</li>
+            <li class="flex items-center gap-2"><span class="h-2.5 w-2.5 shrink-0 rounded-full bg-lime-400"></span> Good (100–150%)</li>
+            <li class="flex items-center gap-2"><span class="h-2.5 w-2.5 shrink-0 rounded-full bg-amber-400"></span> Average (50–99%)</li>
+            <li class="flex items-center gap-2"><span class="h-2.5 w-2.5 shrink-0 rounded-full bg-red-500"></span> Low (&lt;50%)</li>
+          </ul>
         </div>
         <div class="dashboard-card p-5">
-          <h2 class="text-lg font-bold text-slate-900">EEE Items Sales Trend</h2>
-          <p class="text-xs text-slate-500">Sales volume by financial year</p>
+          <h2 class="text-lg font-bold text-slate-900">Target vs Achievement Comparison</h2>
+          <p class="text-xs text-slate-500">Values in thousands (K)</p>
           <div class="mt-4 h-72">
-            <canvas id="chart-line"></canvas>
+            <canvas id="chart-bar"></canvas>
           </div>
         </div>
       </section>
 
-      <!-- Detail filters -->
-      <section class="dashboard-card p-5 animate-fade-in-up" style="animation-delay:0.12s">
-        <h2 class="text-lg font-bold text-slate-900">Consumption filters</h2>
-        <p class="text-xs text-slate-500">Refine sales data (fiscal year also available in the header).</p>
-        <form id="filter-form" class="mt-4 space-y-4" onsubmit="event.preventDefault(); applyDetailFilters();">
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div>
-              <label class="mb-1 block text-xs font-semibold text-slate-600" for="filter-entity">Entity Name</label>
-              <input id="filter-entity" type="text" placeholder="Search entity"
-                class="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none" />
-            </div>
-            <div>
-              <label class="mb-1 block text-xs font-semibold text-slate-600" for="filter-sub">Sub Entity Name</label>
-              <input id="filter-sub" type="text" placeholder="Sub entity"
-                class="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none" />
-            </div>
-            <div>
-              <label class="mb-1 block text-xs font-semibold text-slate-600" for="filter-epr">EPR Type</label>
-              <select id="filter-epr"
-                class="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none">
-                <option>All</option>
-                <option>PWMR</option>
-                <option>BWMR</option>
-                <option>EWMR</option>
-              </select>
-            </div>
-          </div>
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div>
-              <label class="mb-1 block text-xs font-semibold text-slate-600" for="filter-etype">Entity Type</label>
-              <select id="filter-etype"
-                class="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none">
-                <option>All</option>
-                <option>Producer</option>
-                <option>Importer</option>
-                <option>Brand Owner</option>
-              </select>
-            </div>
-            <div>
-              <label class="mb-1 block text-xs font-semibold text-slate-600" for="filter-loc">Unit Location</label>
-              <input id="filter-loc" type="text" placeholder="City / State"
-                class="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none" />
-            </div>
-          </div>
-          <div class="flex flex-wrap justify-end gap-3 pt-2">
-            <button type="button" onclick="resetDetailFilters()"
-              class="rounded-lg border-2 border-gray-200 bg-slate-50 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Reset
-              Filters</button>
-            <button type="submit"
-              class="rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:from-emerald-600 hover:to-emerald-700">Apply
-              Filters</button>
-          </div>
-        </form>
-      </section>
-
-      <!-- Categories -->
-      <section class="dashboard-card overflow-hidden animate-fade-in-up" style="animation-delay:0.14s">
-        <div class="border-b border-slate-200 px-5 py-4">
-          <h2 class="text-lg font-bold text-slate-900">Categories Overview</h2>
-        </div>
-        <div class="overflow-x-auto p-4 sm:p-5">
-          <div class="rounded-xl border border-slate-200">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Category</th>
-                  <th>Pre</th>
-                  <th>Post</th>
-                  <th>Export</th>
-                  <th>Total</th>
-                  <th>% Recycled</th>
-                  <th>Recycled Content Qty</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="tbody-categories"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- Three tables -->
-      <section class="grid grid-cols-1 gap-6 lg:grid-cols-3 animate-fade-in-up" style="animation-delay:0.16s">
-        <div class="dashboard-card overflow-hidden">
-          <div class="border-b border-slate-200 px-4 py-3">
-            <h3 class="text-sm font-bold text-slate-900">Registered Customer Details</h3>
-          </div>
-          <div class="overflow-x-auto p-3">
-            <div class="rounded-xl border border-slate-200">
-              <table class="data-table text-sm">
-                <thead>
-                  <tr>
-                    <th>Category</th>
-                    <th>Customer</th>
-                    <th>Total Qty</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="tbody-reg"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        <div class="dashboard-card overflow-hidden">
-          <div class="border-b border-slate-200 px-4 py-3">
-            <h3 class="text-sm font-bold text-slate-900">Unregistered Customer Details</h3>
-          </div>
-          <div class="overflow-x-auto p-3">
-            <div class="rounded-xl border border-slate-200">
-              <table class="data-table text-sm">
-                <thead>
-                  <tr>
-                    <th>Category</th>
-                    <th>Customer</th>
-                    <th>Total Qty</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="tbody-unreg"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        <div class="dashboard-card overflow-hidden">
-          <div class="border-b border-slate-200 px-4 py-3">
-            <h3 class="text-sm font-bold text-slate-900">Comparison with Last Year</h3>
-          </div>
-          <div class="overflow-x-auto p-3">
-            <div class="rounded-xl border border-slate-200">
-              <table class="data-table text-sm">
-                <thead>
-                  <tr>
-                    <th>Category</th>
-                    <th>2024-25</th>
-                    <th>2023-24</th>
-                    <th>Change</th>
-                  </tr>
-                </thead>
-                <tbody id="tbody-compare"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- State-wise -->
-      <section class="dashboard-card overflow-hidden animate-fade-in-up" style="animation-delay:0.18s">
-        <div class="border-b border-slate-200 px-5 py-4">
-          <h2 class="text-lg font-bold text-slate-900">State-wise Sales Distribution</h2>
-        </div>
-        <div class="overflow-x-auto p-4 sm:p-5">
-          <div class="rounded-xl border border-slate-200">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>State/UT</th>
-                  <th>Cat I</th>
-                  <th>Cat II</th>
-                  <th>Cat III</th>
-                  <th>Cat IV</th>
-                  <th>Total</th>
-                  <th>Recycled Qty</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="tbody-states"></tbody>
-            </table>
-          </div>
-        </div>
-        <p class="border-t border-slate-100 px-5 py-3 text-xs text-slate-500">Additional states can be added as needed.</p>
+      <!-- Account cards -->
+      <section class="animate-fade-in-up" style="animation-delay:0.12s">
+        <h2 class="mb-4 text-lg font-bold text-slate-900">AC Wise Performance Details</h2>
+        <div id="account-grid" class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"></div>
       </section>
     </main>
 
@@ -621,7 +454,7 @@
   </div>
 
   <div id="modal-overlay" class="modal-overlay" onclick="closeModal()"></div>
-  <div id="modal-content" class="modal-content">
+  <div id="modal-content" class="modal-content" onclick="event.stopPropagation()">
     <div class="flex items-center justify-between bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-4 text-white">
       <h3 id="modal-title" class="text-lg font-bold">Details</h3>
       <button type="button" onclick="closeModal()"
@@ -635,20 +468,169 @@
   </div>
 
   <script>
-    const categories = [
-      { name: 'Cat I', pre: 120.5, post: 88.2, exp: 0, recycledPct: 0, recycledQty: 0 },
-      { name: 'Cat II', pre: 95.0, post: 102.4, exp: 0, recycledPct: 0, recycledQty: 0 },
-      { name: 'Cat III', pre: 140.2, post: 0, exp: 0, recycledPct: 0, recycledQty: 0 },
-      { name: 'Cat IV', pre: 110.15, post: 0, exp: 0, recycledPct: 0, recycledQty: 0 },
+    const iconFactory = `<svg class="h-5 w-5 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>`;
+    const iconCog = `<svg class="h-5 w-5 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>`;
+    const iconBrief = `<svg class="h-5 w-5 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>`;
+
+    const accounts = [
+      {
+        name: 'Uflex Producer A-1',
+        status: 'done',
+        icon: 'factory',
+        rows: [
+          { cat: 'I', t: 12.5, a: 18.2, d: 45 },
+          { cat: 'II', t: 8.0, a: 7.5, d: -6 },
+          { cat: 'III', t: 15.2, a: 14.8, d: -3 },
+          { cat: 'IV', t: 6.1, a: 6.0, d: 0 },
+        ]
+      },
+      {
+        name: 'CG-81-A-2',
+        status: 'overdue',
+        icon: 'cog',
+        rows: [
+          { cat: 'I', t: 10.0, a: 4.2, d: -58 },
+          { cat: 'II', t: 22.0, a: 11.0, d: -50 },
+          { cat: 'III', t: 9.5, a: 8.0, d: -16 },
+          { cat: 'IV', t: 4.0, a: 2.0, d: -50 },
+        ]
+      },
+      {
+        name: 'Northwind Trading B-4',
+        status: 'pending',
+        icon: 'brief',
+        rows: [
+          { cat: 'I', t: 5.0, a: 2.5, d: null },
+          { cat: 'II', t: 7.2, a: 3.0, d: null },
+          { cat: 'III', t: 4.0, a: 1.0, d: null },
+          { cat: 'IV', t: 3.0, a: 0, d: null },
+        ]
+      },
+      {
+        name: 'EcoPack Unit C-3',
+        status: 'done',
+        icon: 'factory',
+        rows: [
+          { cat: 'I', t: 18.0, a: 28.0, d: 56 },
+          { cat: 'II', t: 11.0, a: 12.5, d: 14 },
+          { cat: 'III', t: 7.0, a: 7.0, d: 0 },
+          { cat: 'IV', t: 5.5, a: 6.2, d: 13 },
+        ]
+      },
+      {
+        name: 'Metro Distributors D-1',
+        status: 'pending',
+        icon: 'cog',
+        rows: [
+          { cat: 'I', t: 9.0, a: 4.5, d: null },
+          { cat: 'II', t: 6.0, a: 3.0, d: null },
+          { cat: 'III', t: 12.0, a: 5.0, d: null },
+          { cat: 'IV', t: 8.0, a: 2.0, d: null },
+        ]
+      },
+      {
+        name: 'Summit Polymers E-2',
+        status: 'done',
+        icon: 'brief',
+        rows: [
+          { cat: 'I', t: 14.0, a: 21.0, d: 50 },
+          { cat: 'II', t: 10.0, a: 11.0, d: 10 },
+          { cat: 'III', t: 8.5, a: 9.0, d: 6 },
+          { cat: 'IV', t: 7.0, a: 8.4, d: 20 },
+        ]
+      },
     ];
 
-    function rowTotal(r) { return r.pre + r.post + r.exp; }
+    function statusBadge(st) {
+      if (st === 'done') return '<span class="acct-status acct-status-done">DONE</span>';
+      if (st === 'overdue') return '<span class="acct-status acct-status-overdue">OVERDUE</span>';
+      return '<span class="acct-status acct-status-pending">PENDING</span>';
+    }
 
-    function pctBadge(pct) {
-      let cls = 'status-deficit';
-      if (pct >= 70) cls = 'status-compliant';
-      else if (pct >= 40) cls = 'status-warning';
-      return `<span class="status-badge ${cls}">${pct}%</span>`;
+    function devPill(d) {
+      if (d === null) return '<span class="dev-pill dev-warn">Pending</span>';
+      if (d === 0) return '<span class="dev-pill dev-zero">0%</span>';
+      if (d > 0) return `<span class="dev-pill dev-pos">+${d}%</span>`;
+      return `<span class="dev-pill dev-neg">${d}%</span>`;
+    }
+
+    function pickIcon(key) {
+      if (key === 'cog') return iconCog;
+      if (key === 'brief') return iconBrief;
+      return iconFactory;
+    }
+
+    function renderAccounts() {
+      const grid = document.getElementById('account-grid');
+      grid.innerHTML = accounts.map((ac) => {
+        let tt = 0, ta = 0;
+        const body = ac.rows.map(r => {
+          tt += r.t;
+          ta += r.a;
+          return `<tr><td class="font-medium">${r.cat}</td><td>${r.t.toFixed(1)}</td><td>${r.a.toFixed(1)}</td><td>${devPill(r.d)}</td></tr>`;
+        }).join('');
+        const totDev = tt ? Math.round(((ta - tt) / tt) * 100) : 0;
+        const totalRow = `<tr class="total-row"><td>Total</td><td>${tt.toFixed(1)}</td><td>${ta.toFixed(1)}</td><td>${devPill(totDev)}</td></tr>`;
+        const safeName = ac.name.replace(/'/g, "\\'");
+        return `
+          <div class="dashboard-card overflow-hidden">
+            <div class="account-card-head flex items-center justify-between gap-2 px-4 py-3">
+              <div class="flex min-w-0 items-center gap-2">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15">${pickIcon(ac.icon)}</span>
+                <span class="truncate text-sm font-semibold sm:text-base">${ac.name}</span>
+              </div>
+              ${statusBadge(ac.status)}
+            </div>
+            <div class="p-3">
+              <table class="account-mini-table">
+                <thead><tr><th>Cat</th><th>Target</th><th>Achieved</th><th>Deviation %</th></tr></thead>
+                <tbody>${body}${totalRow}</tbody>
+              </table>
+              <button type="button" class="mt-3 w-full rounded-lg border border-slate-200 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+                onclick="openModal('${safeName}','<p class=\\'text-slate-600 text-sm\\'>Full audit trail and evidence documents for this account.</p>')">View details</button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function initCharts() {
+      new Chart(document.getElementById('chart-donut'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Excellent', 'Good', 'Average', 'Low'],
+          datasets: [{
+            data: [3, 4, 3, 2],
+            backgroundColor: ['#10b981', '#84cc16', '#fbbf24', '#ef4444'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          cutout: '58%',
+          plugins: { legend: { display: false } },
+          maintainAspectRatio: false
+        }
+      });
+
+      const labels = ['Uflex A-1', 'CG-81', 'Northwind', 'EcoPack', 'Metro', 'Summit'];
+      new Chart(document.getElementById('chart-bar'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            { label: 'Target (K)', data: [42, 45, 19, 42, 31, 40], backgroundColor: '#3b82f6', borderRadius: 6 },
+            { label: 'Achieved (K)', data: [47, 25, 7, 52, 10, 50], backgroundColor: '#10b981', borderRadius: 6 },
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { beginAtZero: true, grid: { color: '#e2e8f0' } }
+          }
+        }
+      });
     }
 
     function openModal(title, html) {
@@ -662,136 +644,10 @@
       document.getElementById('modal-content').classList.remove('active');
     }
 
-    function eyeSvg() {
-      return '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>';
-    }
-
-    function renderCategories() {
-      const tb = document.getElementById('tbody-categories');
-      let html = '';
-      let sumPre = 0, sumPost = 0, sumExp = 0, sumTot = 0, sumRec = 0;
-      categories.forEach(c => {
-        const t = rowTotal(c);
-        sumPre += c.pre; sumPost += c.post; sumExp += c.exp; sumTot += t; sumRec += c.recycledQty;
-        const esc = c.name.replace(/'/g, "\\'");
-        html += `<tr>
-          <td class="font-semibold">${c.name}</td>
-          <td>${c.pre.toFixed(2)}</td>
-          <td>${c.post.toFixed(2)}</td>
-          <td>${c.exp.toFixed(2)}</td>
-          <td class="font-medium">${t.toFixed(2)}</td>
-          <td>${pctBadge(c.recycledPct)}</td>
-          <td>${c.recycledQty.toFixed(2)}</td>
-          <td><button type="button" class="action-btn" title="View" onclick="openModal('${esc}','<p class=\\'text-slate-600\\'>Category breakdown and line items for <strong>${esc}</strong>.</p>')">${eyeSvg()}</button></td>
-        </tr>`;
-      });
-      html += `<tr class="total-row">
-        <td>TOTAL</td>
-        <td>${sumPre.toFixed(2)}</td>
-        <td>${sumPost.toFixed(2)}</td>
-        <td>${sumExp.toFixed(2)}</td>
-        <td>${sumTot.toFixed(2)}</td>
-        <td>—</td>
-        <td>${sumRec.toFixed(2)}</td>
-        <td></td>
-      </tr>`;
-      tb.innerHTML = html;
-    }
-
-    const regRows = [
-      { cat: 'Cat I', cust: 12, qty: 208.7 },
-      { cat: 'Cat II', cust: 8, qty: 197.4 },
-      { cat: 'Cat III', cust: 5, qty: 140.2 },
-      { cat: 'Cat IV', cust: 6, qty: 110.15 },
-    ];
-    const unregRows = [
-      { cat: 'Cat I', cust: 3, qty: 42.1 },
-      { cat: 'Cat II', cust: 2, qty: 28.0 },
-      { cat: 'Cat III', cust: 1, qty: 15.5 },
-      { cat: 'Cat IV', cust: 2, qty: 22.3 },
-    ];
-    const compareRows = [
-      { cat: 'Cat I', cur: 208.7, prev: 195.2, chg: 6.9 },
-      { cat: 'Cat II', cur: 197.4, prev: 210.0, chg: -6.0 },
-      { cat: 'Cat III', cur: 140.2, prev: 132.8, chg: 5.6 },
-      { cat: 'Cat IV', cur: 110.15, prev: 108.0, chg: 2.0 },
-    ];
-
-    function renderSmallTables() {
-      document.getElementById('tbody-reg').innerHTML = regRows.map(r => {
-        const esc = ('Registered ' + r.cat).replace(/'/g, "\\'");
-        return `<tr><td>${r.cat}</td><td>${r.cust}</td><td>${r.qty.toFixed(2)}</td><td><button type="button" class="action-btn" onclick="openModal('${esc}','<p class=\\'text-slate-600\\'>Customer list preview.</p>')">${eyeSvg()}</button></td></tr>`;
-      }).join('');
-      document.getElementById('tbody-unreg').innerHTML = unregRows.map(r => {
-        const esc = ('Unregistered ' + r.cat).replace(/'/g, "\\'");
-        return `<tr><td>${r.cat}</td><td>${r.cust}</td><td>${r.qty.toFixed(2)}</td><td><button type="button" class="action-btn" onclick="openModal('${esc}','<p class=\\'text-slate-600\\'>Unregistered channel detail.</p>')">${eyeSvg()}</button></td></tr>`;
-      }).join('');
-      document.getElementById('tbody-compare').innerHTML = compareRows.map(r => {
-        const pos = r.chg >= 0;
-        const badge = `<span class="status-badge ${pos ? 'status-compliant' : 'status-deficit'}">${pos ? '+' : ''}${r.chg}%</span>`;
-        return `<tr><td>${r.cat}</td><td>${r.cur.toFixed(2)}</td><td>${r.prev.toFixed(2)}</td><td>${badge}</td></tr>`;
-      }).join('');
-    }
-
-    const states = [
-      { s: 'Maharashtra', c1: 185.2, c2: 142.5, c3: 98.0, c4: 76.3 },
-      { s: 'Goa', c1: 22.1, c2: 18.4, c3: 12.0, c4: 9.8 },
-      { s: 'Bihar', c1: 45.0, c2: 38.2, c3: 28.5, c4: 21.0 },
-      { s: 'Andhra Pradesh', c1: 92.4, c2: 71.3, c3: 55.2, c4: 44.1 },
-    ];
-
-    function renderStates() {
-      document.getElementById('tbody-states').innerHTML = states.map(st => {
-        const tot = st.c1 + st.c2 + st.c3 + st.c4;
-        const esc = st.s.replace(/'/g, "\\'");
-        return `<tr>
-          <td class="font-medium">${st.s}</td>
-          <td>${st.c1.toFixed(2)}</td>
-          <td>${st.c2.toFixed(2)}</td>
-          <td>${st.c3.toFixed(2)}</td>
-          <td>${st.c4.toFixed(2)}</td>
-          <td class="font-semibold">${tot.toFixed(2)}</td>
-          <td>${(0).toFixed(2)}</td>
-          <td><button type="button" class="action-btn" onclick="openModal('${esc}','<p class=\\'text-slate-600\\'>State-level drill-down.</p>')">${eyeSvg()}</button></td>
-        </tr>`;
-      }).join('');
-    }
-
-    function initCharts() {
-      const totals = categories.map(rowTotal);
-      const colors = ['#3b82f6', '#10b981', '#ec4899', '#14b8a6'];
-      new Chart(document.getElementById('chart-donut'), {
-        type: 'doughnut',
-        data: {
-          labels: ['Cat I', 'Cat II', 'Cat III', 'Cat IV'],
-          datasets: [{ data: totals, backgroundColor: colors, borderWidth: 0 }]
-        },
-        options: {
-          cutout: '62%',
-          plugins: { legend: { display: false } },
-          maintainAspectRatio: false
-        }
-      });
-
-      new Chart(document.getElementById('chart-line'), {
-        type: 'line',
-        data: {
-          labels: ['2021-22', '2022-23', '2023-24', '2024-25'],
-          datasets: [
-            { label: 'ITW1', data: [420, 465, 510, 545], borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.08)', tension: 0.35, fill: true },
-            { label: 'ITW2', data: [380, 402, 438, 460], borderColor: '#0ea5e9', tension: 0.35, fill: false },
-            { label: 'ITW3', data: [310, 335, 360, 388], borderColor: '#10b981', tension: 0.35, fill: false },
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom' } },
-          scales: {
-            y: { beginAtZero: false, grid: { color: '#e2e8f0' } },
-            x: { grid: { display: false } }
-          }
-        }
+    function refreshTimestamp() {
+      const d = new Date();
+      document.getElementById('last-updated').textContent = d.toLocaleDateString('en-IN', {
+        day: 'numeric', month: 'short', year: 'numeric'
       });
     }
 
@@ -849,21 +705,8 @@
       }
     }
 
-    function resetDetailFilters() {
-      document.getElementById('filter-form').reset();
-    }
-
-    function applyDetailFilters() {
-      const d = new Date();
-      document.getElementById('last-updated').textContent = d.toLocaleDateString('en-IN', {
-        day: 'numeric', month: 'short', year: 'numeric'
-      });
-    }
-
     initPortalChrome();
-    renderCategories();
-    renderSmallTables();
-    renderStates();
+    renderAccounts();
     initCharts();
   </script>
 </body>

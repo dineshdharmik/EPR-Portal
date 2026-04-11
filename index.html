@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EPR Portal</title>
-  <script src="/_sdk/element_sdk.js"></script>
   <link
     href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap"
     rel="stylesheet">
@@ -112,13 +111,13 @@
                 EPR Consumption
               </a>
 
-              <a href="#epr-credits"
+              <a href="epr-credit-page.html"
                 class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer"
                 data-section="epr-credits">
                 EPR Credits
               </a>
 
-              <a href="#account-view"
+              <a href="epr-account-wise.html"
                 class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer"
                 data-section="account-view">
                 Account Wise View
@@ -1307,9 +1306,13 @@
               <div class="absolute top-0 right-0 w-48 h-48 bg-white bg-opacity-10 rounded-full -mr-24 -mt-24"></div>
             </div><!-- Suggested Questions -->
             <div class="mb-6">
+              <div id="copilot-setup-hint"
+                class="hidden mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"
+                role="status"></div>
               <p class="text-sm font-medium text-gray-600 mb-3">Suggested questions:</p>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3"><button
-                  class="text-left p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200 hover:border-purple-400 hover:shadow-md transition-all">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3"><button type="button"
+                  class="copilot-suggested-q text-left p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200 hover:border-purple-400 hover:shadow-md transition-all"
+                  data-prompt="How can I reduce my PWMR compliance costs?">
                   <div class="flex items-start space-x-3">
                     <svg class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
                       viewbox="0 0 24 24">
@@ -1320,8 +1323,9 @@
                       <p class="text-sm font-semibold text-gray-800">How can I reduce my PWMR compliance costs?</p>
                     </div>
                   </div>
-                </button> <button
-                  class="text-left p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200 hover:border-blue-400 hover:shadow-md transition-all">
+                </button> <button type="button"
+                  class="copilot-suggested-q text-left p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200 hover:border-blue-400 hover:shadow-md transition-all"
+                  data-prompt="What are the upcoming deadlines for my account?">
                   <div class="flex items-start space-x-3">
                     <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
                       viewbox="0 0 24 24">
@@ -1332,8 +1336,9 @@
                       <p class="text-sm font-semibold text-gray-800">What are the upcoming deadlines for my account?</p>
                     </div>
                   </div>
-                </button> <button
-                  class="text-left p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 hover:border-green-400 hover:shadow-md transition-all">
+                </button> <button type="button"
+                  class="copilot-suggested-q text-left p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 hover:border-green-400 hover:shadow-md transition-all"
+                  data-prompt="Explain the difference between PWMR and EWMR">
                   <div class="flex items-start space-x-3">
                     <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
                       viewbox="0 0 24 24">
@@ -1344,8 +1349,9 @@
                       <p class="text-sm font-semibold text-gray-800">Explain the difference between PWMR and EWMR</p>
                     </div>
                   </div>
-                </button> <button
-                  class="text-left p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border border-yellow-200 hover:border-yellow-400 hover:shadow-md transition-all">
+                </button> <button type="button"
+                  class="copilot-suggested-q text-left p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border border-yellow-200 hover:border-yellow-400 hover:shadow-md transition-all"
+                  data-prompt="Show me my credit utilization trends">
                   <div class="flex items-start space-x-3">
                     <svg class="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
                       viewbox="0 0 24 24">
@@ -1388,8 +1394,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                       </svg></button>
-                  </div><button type="submit"
-                    class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl">
+                  </div><button type="submit" id="chat-submit"
+                    class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

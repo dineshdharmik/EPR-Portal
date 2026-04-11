@@ -197,71 +197,187 @@ async function onConfigChange(config) {
     });
 }
 
-// Chat functionality
+// AI Copilot — calls api/copilot-chat.php (Gemini or Groq via server-side key)
 const chatForm = document.getElementById('chat-form');
 const chatInput = document.getElementById('chat-input');
 const chatMessages = document.getElementById('chat-messages');
+const chatSubmit = document.getElementById('chat-submit');
+const copilotSetupHint = document.getElementById('copilot-setup-hint');
 
-const sampleResponses = [
-    "Based on your current data, I recommend purchasing 2,500 PWMR credits by January 18th to optimize costs. The predicted price increase of 4.2% could cost you an additional ₹8,200.",
-    "Your upcoming deadlines are: PWMR Q4 Report (Jan 15), EPR Certificate Renewal (Jan 20), and Annual EWMR Declaration (Jan 31). Would you like me to prepare the documents?",
-    "PWMR (Plastic Waste Management Rules) focuses on plastic packaging waste, while EWMR (E-Waste Management Rules) covers electronic equipment. Both require separate compliance tracking and credits.",
-    "Your credit utilization is trending upward at 12% month-over-month. You're currently at 85% efficiency compared to 73% industry average. PWMR credits are your highest consumption at 40%."
-];
+const COPILOT_API = 'api/copilot-chat.php';
+const COPILOT_HEALTH = 'api/copilot-health.php';
 
-let responseIndex = 0;
+/** @type {{ role: string, content: string }[]} */
+let copilotHistory = [];
 
-if (chatForm) {
+function scrollChatToBottom() {
+    if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+}
+
+function appendUserBubble(text) {
+    const row = document.createElement('div');
+    row.className = 'flex items-start space-x-3 justify-end';
+    const bubble = document.createElement('div');
+    bubble.className =
+        'flex-1 bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-2xl rounded-tr-none p-4 max-w-xl ml-auto';
+    const p = document.createElement('p');
+    p.className = 'text-sm whitespace-pre-wrap';
+    p.textContent = text;
+    const time = document.createElement('span');
+    time.className = 'text-xs text-white text-opacity-80 mt-2 block';
+    time.textContent = 'Just now';
+    bubble.appendChild(p);
+    bubble.appendChild(time);
+    const avatar = document.createElement('div');
+    avatar.className =
+        'flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center text-white font-semibold text-sm';
+    avatar.textContent = 'You';
+    row.appendChild(bubble);
+    row.appendChild(avatar);
+    chatMessages.appendChild(row);
+}
+
+function appendAiBubble(text, isError) {
+    const row = document.createElement('div');
+    row.className = 'flex items-start space-x-3';
+    const iconWrap = document.createElement('div');
+    iconWrap.className =
+        'flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center';
+    iconWrap.innerHTML =
+        '<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>';
+    const bubble = document.createElement('div');
+    bubble.className = isError
+        ? 'flex-1 rounded-2xl rounded-tl-none border border-red-200 bg-red-50 p-4'
+        : 'flex-1 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl rounded-tl-none p-4';
+    const p = document.createElement('p');
+    p.className = isError ? 'text-sm text-red-800 whitespace-pre-wrap' : 'text-sm text-gray-800 whitespace-pre-wrap';
+    p.textContent = text;
+    const time = document.createElement('span');
+    time.className = isError ? 'text-xs text-red-600 mt-2 block' : 'text-xs text-gray-500 mt-2 block';
+    time.textContent = 'Just now';
+    bubble.appendChild(p);
+    bubble.appendChild(time);
+    row.appendChild(iconWrap);
+    row.appendChild(bubble);
+    chatMessages.appendChild(row);
+}
+
+function appendTypingIndicator() {
+    const row = document.createElement('div');
+    row.className = 'flex items-start space-x-3 copilot-typing-row';
+    row.innerHTML = `
+      <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center opacity-70">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      </div>
+      <div class="flex-1 bg-gray-100 rounded-2xl rounded-tl-none p-4">
+        <p class="text-sm text-gray-500">Thinking…</p>
+      </div>`;
+    chatMessages.appendChild(row);
+    scrollChatToBottom();
+    return row;
+}
+
+function removeTypingIndicator(row) {
+    if (row && row.parentNode) {
+        row.parentNode.removeChild(row);
+    }
+}
+
+function setCopilotLoading(loading) {
+    if (chatSubmit) {
+        chatSubmit.disabled = loading;
+    }
+    if (chatInput) {
+        chatInput.disabled = loading;
+    }
+}
+
+async function sendCopilotMessage(message) {
+    const trimmed = message.trim();
+    if (!trimmed || !chatMessages) return;
+
+    copilotHistory.push({ role: 'user', content: trimmed });
+    appendUserBubble(trimmed);
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    scrollChatToBottom();
+
+    const typingRow = appendTypingIndicator();
+    setCopilotLoading(true);
+
+    try {
+        const res = await fetch(COPILOT_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: copilotHistory }),
+        });
+        const data = await res.json().catch(() => ({}));
+        removeTypingIndicator(typingRow);
+
+        if (data.ok && typeof data.text === 'string' && data.text.trim() !== '') {
+            copilotHistory.push({ role: 'assistant', content: data.text });
+            appendAiBubble(data.text, false);
+        } else {
+            const err =
+                typeof data.error === 'string' && data.error
+                    ? data.error
+                    : 'Something went wrong. Check your connection and API configuration.';
+            copilotHistory.pop();
+            appendAiBubble(err, true);
+        }
+    } catch {
+        removeTypingIndicator(typingRow);
+        copilotHistory.pop();
+        appendAiBubble('Could not reach the Copilot service. Ensure the site is running on PHP (e.g. XAMPP) and try again.', true);
+    } finally {
+        setCopilotLoading(false);
+        scrollChatToBottom();
+    }
+}
+
+if (chatForm && chatInput && chatMessages) {
     chatForm.addEventListener('submit', (e) => {
         e.preventDefault();
-
-        const message = chatInput.value.trim();
-        if (!message) return;
-
-        // Add user message
-        const userMessageDiv = document.createElement('div');
-        userMessageDiv.className = 'flex items-start space-x-3 justify-end';
-        userMessageDiv.innerHTML = `
-          <div class="flex-1 bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-2xl rounded-tr-none p-4 max-w-xl ml-auto">
-            <p class="text-sm">${message}</p>
-            <span class="text-xs text-white text-opacity-80 mt-2 block">Just now</span>
-          </div>
-          <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center text-white font-semibold text-sm">
-            You
-          </div>
-        `;
-        chatMessages.appendChild(userMessageDiv);
-        chatInput.value = '';
-
-        // Scroll to bottom
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-
-        // Simulate AI typing
-        setTimeout(() => {
-            const aiMessageDiv = document.createElement('div');
-            aiMessageDiv.className = 'flex items-start space-x-3';
-            aiMessageDiv.innerHTML = `
-            <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
-            </div>
-            <div class="flex-1 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl rounded-tl-none p-4">
-              <p class="text-sm text-gray-800">${sampleResponses[responseIndex % sampleResponses.length]}</p>
-              <span class="text-xs text-gray-500 mt-2 block">Just now</span>
-            </div>
-          `;
-            chatMessages.appendChild(aiMessageDiv);
-            responseIndex++;
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }, 1000);
+        if (chatSubmit && chatSubmit.disabled) return;
+        sendCopilotMessage(chatInput.value);
     });
 
-    // Auto-resize textarea
+    chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.requestSubmit();
+        }
+    });
+
     chatInput.addEventListener('input', function () {
         this.style.height = 'auto';
         this.style.height = Math.min(this.scrollHeight, 120) + 'px';
     });
+
+    document.querySelectorAll('.copilot-suggested-q').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const prompt = btn.getAttribute('data-prompt') || '';
+            if (!prompt || (chatSubmit && chatSubmit.disabled)) return;
+            chatInput.value = prompt;
+            sendCopilotMessage(prompt);
+        });
+    });
+
+    fetch(COPILOT_HEALTH)
+        .then((r) => r.json())
+        .then((h) => {
+            if (!h || h.configured || !copilotSetupHint) return;
+            copilotSetupHint.classList.remove('hidden');
+            copilotSetupHint.innerHTML =
+                '<strong>Setup required for live AI:</strong> Copy <code class="rounded bg-amber-100 px-1">api/copilot-config.example.php</code> to <code class="rounded bg-amber-100 px-1">api/copilot-config.local.php</code>, add a free key from ' +
+                '<a class="font-medium underline" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio (Gemini)</a> or ' +
+                '<a class="font-medium underline" href="https://console.groq.com/keys" target="_blank" rel="noopener">Groq</a>, then refresh this page.';
+        })
+        .catch(() => {});
 }
 
 if (window.elementSdk) {
@@ -317,5 +433,3 @@ if (window.elementSdk) {
         ])
     });
 }
-
-(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9c503bc1c2303d18',t:'MTc2OTYwMDYyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();
