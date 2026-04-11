@@ -1,0 +1,1510 @@
+<!doctype html>
+<html lang="en" class="h-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EPR Portal</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="assets/css/style.css" rel="stylesheet">
+</head>
+
+<body class="h-full overflow-hidden" style="margin: 0; background: #f3f4f6;">
+  <div class="w-full h-full flex flex-col"><!-- Top Header with Logo and Filters -->
+    <header class="bg-white shadow-md z-20"><!-- Logo and EPR Category Tabs Row -->
+
+
+      <div class="px-6 py-4 flex items-center justify-between border-b border-gray-200">
+        <div class="flex items-center space-x-6">
+          <div class="flex items-center space-x-4">
+            <div
+              class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-600 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+              </svg>
+            </div>
+            <div>
+              <h1 id="portal-title" class="text-gray-800 font-bold text-xl leading-tight">EPR Portal</h1>
+              <p id="portal-subtitle" class="text-gray-500 text-xs">Extended Producer Responsibility</p>
+            </div>
+          </div><!-- EPR Category Tabs -->
+          <div class="flex items-center space-x-2 bg-gray-100 rounded-lg p-1"><button
+              class="epr-category-tab active px-6 py-2 rounded-md font-semibold text-sm transition-all"
+              data-category="pwmr"> PWMR </button> <button
+              class="epr-category-tab px-6 py-2 rounded-md font-semibold text-sm transition-all" data-category="bwmr">
+              BWMR </button> <button class="epr-category-tab px-6 py-2 rounded-md font-semibold text-sm transition-all"
+              data-category="ewmr"> EWMR </button>
+          </div>
+        </div><!-- User Actions -->
+        <div class="flex items-center space-x-4"><button class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg></button>
+          <div
+            class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center">
+            <span class="text-white font-semibold text-sm">AD</span>
+          </div>
+        </div>
+      </div><!-- Filters Row -->
+
+      <nav class="px-6 bg-gradient-to-r from-slate-800 to-slate-700">
+        <div class="flex items-center space-x-1">
+          <div
+            class="nav-item active px-6 py-4 text-white flex items-center space-x-2 cursor-pointer border-b-3 border-green-500 hover:bg-white hover:bg-opacity-10"
+            data-section="home">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg><span class="font-medium text-sm whitespace-nowrap">Home Dashboard</span>
+          </div>
+          <div
+            class="nav-item px-6 py-4 text-white flex items-center space-x-2 cursor-pointer border-b-3 border-transparent hover:bg-white hover:bg-opacity-10"
+            data-section="leadership">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg><span class="font-medium text-sm whitespace-nowrap">Leadership All EPR Dashboard</span>
+          </div>
+          <div
+            class="nav-item px-6 py-4 text-white flex items-center space-x-2 cursor-pointer border-b-3 border-transparent hover:bg-white hover:bg-opacity-10"
+            data-section="calendar">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg><span class="font-medium text-sm whitespace-nowrap">Compliance Calendar</span>
+          </div>
+          <div class="relative nav-parent">
+            <div
+              class="nav-item px-6 py-4 text-white flex items-center space-x-2 cursor-pointer border-b-3 border-transparent hover:bg-white hover:bg-opacity-10"
+              data-toggle="main-menu">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg><span class="font-medium text-sm whitespace-nowrap">Menu</span>
+              <svg class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+            <div
+              class="submenu-horizontal absolute top-full left-0 bg-slate-800 shadow-lg rounded-b-lg min-w-[280px] z-30"
+              id="main-menu">
+
+              <a href="epr-consumption-dashboard.html"
+                class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer"
+                data-section="epr-compliance">
+                EPR Compliance Dashboard
+              </a>
+
+              <a href="epr-purchase.html"
+                class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer"
+                data-section="epr-purchase">
+                EPR Purchase
+              </a>
+
+              <a href="#epr-consumption"
+                class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer"
+                data-section="epr-consumption">
+                EPR Consumption
+              </a>
+
+              <a href="#epr-credits"
+                class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer"
+                data-section="epr-credits">
+                EPR Credits
+              </a>
+
+              <a href="#account-view"
+                class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer"
+                data-section="account-view">
+                Account Wise View
+              </a>
+
+              <a href="#real-time"
+                class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer rounded-b-lg"
+                data-section="real-time">
+                Real Time Data Status
+              </a>
+
+            </div>
+          </div>
+          <div class="h-6 w-px bg-gray-600 mx-2"></div>
+          <div
+            class="nav-item px-6 py-4 text-white flex items-center space-x-2 cursor-pointer border-b-3 border-transparent hover:bg-white hover:bg-opacity-10"
+            data-section="ai-insights">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg><span class="font-medium text-sm whitespace-nowrap">AI Insights</span>
+          </div>
+          <div
+            class="nav-item px-6 py-4 text-white flex items-center space-x-2 cursor-pointer border-b-3 border-transparent hover:bg-white hover:bg-opacity-10"
+            data-section="ai-copilot">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg><span class="font-medium text-sm whitespace-nowrap">AI Copilot</span>
+          </div>
+        </div>
+      </nav>
+      <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
+        <div class="flex items-center space-x-6">
+          <div class="flex items-center space-x-3"><label for="group-filter"
+              class="text-sm font-medium text-gray-700 whitespace-nowrap">Group:</label> <select id="group-filter"
+              class="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none text-sm min-w-[200px] bg-white">
+              <option value="all">All Groups</option>
+              <option value="global">Global Enterprises Ltd</option>
+              <option value="asia">Asia Pacific Group</option>
+              <option value="india">India Operations</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-3"><label for="entity-filter"
+              class="text-sm font-medium text-gray-700 whitespace-nowrap">Entity:</label> <select id="entity-filter"
+              class="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none text-sm min-w-[240px] bg-white">
+              <option value="all">All Legal Entities</option>
+              <option value="manufacturing">Manufacturing Unit - Delhi</option>
+              <option value="distribution">Distribution Hub - Mumbai</option>
+              <option value="processing">Processing Center - Bangalore</option>
+              <option value="retail">Retail Operations - Chennai</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-3"><label for="user-filter"
+              class="text-sm font-medium text-gray-700 whitespace-nowrap">User View:</label> <select id="user-filter"
+              class="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none text-sm min-w-[180px] bg-white">
+              <option value="aggregated">Aggregated View</option>
+              <option value="individual">Individual View</option>
+              <option value="manager">Manager View</option>
+              <option value="admin">Admin View</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-3"><label for="custom-filter"
+              class="text-sm font-semibold text-gray-700 whitespace-nowrap">Custom View:</label> <select
+              id="custom-filter"
+              class="px-4 py-2 border-2 border-green-300 rounded-lg focus:border-green-500 focus:outline-none text-sm min-w-[200px] bg-white font-medium shadow-sm">
+              <option value="all">All Views</option>
+              <option value="hub">Hub View</option>
+              <option value="location">Location View</option>
+              <option value="regional">Regional View</option>
+              <option value="department">Department View</option>
+              <option value="project">Project View</option>
+            </select>
+          </div>
+        </div>
+      </div><!-- Horizontal Navigation -->
+
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto" style="height: calc(100% - 140px);">
+      <div class="p-6"><!-- Home Dashboard Section -->
+        <div id="home-section" class="content-section active">
+          <div class="mb-6">
+            <h3 id="home-welcome" class="text-xl font-semibold text-gray-800 mb-4">Welcome to EPR Portal</h3>
+          </div><!-- Key Metrics -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="stat-card p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div><span class="badge badge-success">+12%</span>
+              </div>
+              <h4 class="text-gray-500 text-sm font-medium">Compliance Rate</h4>
+              <p class="text-3xl font-bold text-gray-800 mt-2">94.5%</p>
+            </div>
+            <div class="stat-card p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                </div><span class="badge badge-info">Active</span>
+              </div>
+              <h4 class="text-gray-500 text-sm font-medium">Total EPR Credits</h4>
+              <p class="text-3xl font-bold text-gray-800 mt-2">45,230</p>
+            </div>
+            <div class="stat-card p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div><span class="badge badge-warning">Pending</span>
+              </div>
+              <h4 class="text-gray-500 text-sm font-medium">Pending Actions</h4>
+              <p class="text-3xl font-bold text-gray-800 mt-2">8</p>
+            </div>
+            <div class="stat-card p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div><span class="badge badge-success">+8%</span>
+              </div>
+              <h4 class="text-gray-500 text-sm font-medium">Recycling Target</h4>
+              <p class="text-3xl font-bold text-gray-800 mt-2">87.2%</p>
+            </div>
+          </div><!-- Recent Activity & Compliance Overview -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="chart-container">
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">Monthly Compliance Trend</h4>
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between text-sm mb-2"><span class="text-gray-600">PWMR Compliance</span>
+                    <span class="font-semibold text-gray-800">92%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 92%;"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm mb-2"><span class="text-gray-600">BWMR Compliance</span>
+                    <span class="font-semibold text-gray-800">88%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 88%;"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm mb-2"><span class="text-gray-600">EWMR Compliance</span>
+                    <span class="font-semibold text-gray-800">95%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 95%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chart-container">
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">Recent Activities</h4>
+              <div class="space-y-3">
+                <div class="flex items-start space-x-3 pb-3 border-b border-gray-100">
+                  <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-800">EPR Credits Purchased</p>
+                    <p class="text-xs text-gray-500 mt-1">2,500 credits added • 2 hours ago</p>
+                  </div>
+                </div>
+                <div class="flex items-start space-x-3 pb-3 border-b border-gray-100">
+                  <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-800">Compliance Report Submitted</p>
+                    <p class="text-xs text-gray-500 mt-1">Q4 2024 Report • 5 hours ago</p>
+                  </div>
+                </div>
+                <div class="flex items-start space-x-3 pb-3 border-b border-gray-100">
+                  <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-800">Action Required</p>
+                    <p class="text-xs text-gray-500 mt-1">Update PWMR data • 1 day ago</p>
+                  </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <div class="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-800">Target Achievement</p>
+                    <p class="text-xs text-gray-500 mt-1">90% recycling milestone reached • 2 days ago</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- Quick Actions -->
+          <div class="data-table">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-800">Quick Actions</h4>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-6"><button
+                class="flex items-center space-x-4 p-4 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <div class="text-left">
+                  <p class="font-semibold text-gray-800">Purchase Credits</p>
+                  <p class="text-xs text-gray-500">Buy EPR credits</p>
+                </div>
+              </button> <button
+                class="flex items-center space-x-4 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div class="text-left">
+                  <p class="font-semibold text-gray-800">Submit Report</p>
+                  <p class="text-xs text-gray-500">File compliance report</p>
+                </div>
+              </button> <button
+                class="flex items-center space-x-4 p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                  </svg>
+                </div>
+                <div class="text-left">
+                  <p class="font-semibold text-gray-800">View Analytics</p>
+                  <p class="text-xs text-gray-500">Detailed insights</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div><!-- Leadership All EPR Dashboard -->
+        <div id="leadership-section" class="content-section">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Total EPR Obligations</h4>
+              <p class="text-3xl font-bold text-gray-800">₹12.4M</p>
+              <p class="text-sm text-green-600 mt-2">↑ 15% vs last quarter</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Active Entities</h4>
+              <p class="text-3xl font-bold text-gray-800">247</p>
+              <p class="text-sm text-blue-600 mt-2">Across all categories</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Overall Compliance</h4>
+              <p class="text-3xl font-bold text-gray-800">91.3%</p>
+              <p class="text-sm text-green-600 mt-2">Industry leading</p>
+            </div>
+          </div>
+          <div class="data-table mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-800">EPR Performance by Category</h4>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Category</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Target (MT)</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Achieved (MT)</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Compliance</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">Plastic Waste</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">15,000</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">13,950</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">93%</td>
+                    <td class="px-6 py-4"><span class="badge badge-success">On Track</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">Battery Waste</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">8,500</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">7,225</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">85%</td>
+                    <td class="px-6 py-4"><span class="badge badge-warning">Needs Attention</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">E-Waste</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">12,000</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">11,520</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">96%</td>
+                    <td class="px-6 py-4"><span class="badge badge-success">Excellent</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">Tire Waste</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">6,200</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">5,580</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">90%</td>
+                    <td class="px-6 py-4"><span class="badge badge-success">On Track</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div><!-- Compliance Calendar -->
+        <div id="calendar-section" class="content-section">
+          <div class="data-table mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-800">Upcoming Compliance Deadlines</h4>
+            </div>
+            <div class="p-6">
+              <div class="space-y-4">
+                <div class="flex items-start space-x-4 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                  <div class="text-center">
+                    <div class="text-2xl font-bold text-red-600">
+                      15
+                    </div>
+                    <div class="text-xs text-red-600">
+                      JAN
+                    </div>
+                  </div>
+                  <div class="flex-1">
+                    <h5 class="font-semibold text-gray-800">PWMR Q4 Report Submission</h5>
+                    <p class="text-sm text-gray-600 mt-1">Submit quarterly plastic waste management report</p><span
+                      class="badge badge-danger mt-2">Due in 3 days</span>
+                  </div>
+                </div>
+                <div class="flex items-start space-x-4 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded">
+                  <div class="text-center">
+                    <div class="text-2xl font-bold text-yellow-600">
+                      20
+                    </div>
+                    <div class="text-xs text-yellow-600">
+                      JAN
+                    </div>
+                  </div>
+                  <div class="flex-1">
+                    <h5 class="font-semibold text-gray-800">EPR Certificate Renewal</h5>
+                    <p class="text-sm text-gray-600 mt-1">Renew EPR registration certificates</p><span
+                      class="badge badge-warning mt-2">Due in 8 days</span>
+                  </div>
+                </div>
+                <div class="flex items-start space-x-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+                  <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-600">
+                      31
+                    </div>
+                    <div class="text-xs text-blue-600">
+                      JAN
+                    </div>
+                  </div>
+                  <div class="flex-1">
+                    <h5 class="font-semibold text-gray-800">Annual EWMR Declaration</h5>
+                    <p class="text-sm text-gray-600 mt-1">File annual e-waste management return</p><span
+                      class="badge badge-info mt-2">Due in 19 days</span>
+                  </div>
+                </div>
+                <div class="flex items-start space-x-4 p-4 bg-green-50 border-l-4 border-green-500 rounded">
+                  <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600">
+                      05
+                    </div>
+                    <div class="text-xs text-green-600">
+                      FEB
+                    </div>
+                  </div>
+                  <div class="flex-1">
+                    <h5 class="font-semibold text-gray-800">BWMR Target Review</h5>
+                    <p class="text-sm text-gray-600 mt-1">Review and update battery waste targets</p><span
+                      class="badge badge-success mt-2">Upcoming</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- EPR Compliance Dashboard -->
+        <div id="epr-compliance-section" class="content-section">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="stat-card p-6">
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h4 class="text-gray-500 text-sm font-medium">Compliant</h4>
+              <p class="text-2xl font-bold text-gray-800 mt-2">186</p>
+            </div>
+            <div class="stat-card p-6">
+              <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-3">
+                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h4 class="text-gray-500 text-sm font-medium">Partial</h4>
+              <p class="text-2xl font-bold text-gray-800 mt-2">42</p>
+            </div>
+            <div class="stat-card p-6">
+              <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-3">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <h4 class="text-gray-500 text-sm font-medium">Non-Compliant</h4>
+              <p class="text-2xl font-bold text-gray-800 mt-2">19</p>
+            </div>
+            <div class="stat-card p-6">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h4 class="text-gray-500 text-sm font-medium">Pending Review</h4>
+              <p class="text-2xl font-bold text-gray-800 mt-2">28</p>
+            </div>
+          </div>
+          <div class="data-table">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-800">Compliance Status Details</h4>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Entity ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Entity Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Category</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Target (MT)</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Achieved</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm text-gray-600">EPR-2024-001</td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">ABC Manufacturing Ltd</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">PWMR</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">850</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">823 (97%)</td>
+                    <td class="px-6 py-4"><span class="badge badge-success">Compliant</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm text-gray-600">EPR-2024-002</td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">XYZ Electronics Pvt Ltd</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">EWMR</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">1,200</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">1,152 (96%)</td>
+                    <td class="px-6 py-4"><span class="badge badge-success">Compliant</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm text-gray-600">EPR-2024-003</td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">Green Industries Corp</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">BWMR</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">450</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">360 (80%)</td>
+                    <td class="px-6 py-4"><span class="badge badge-warning">Partial</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm text-gray-600">EPR-2024-004</td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">Tech Solutions India</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">PWMR</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">320</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">198 (62%)</td>
+                    <td class="px-6 py-4"><span class="badge badge-danger">Non-Compliant</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div><!-- EPR Purchase -->
+        <div id="epr-purchase-section" class="content-section">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Total Purchases (This Month)</h4>
+              <p class="text-3xl font-bold text-gray-800">₹8.2L</p>
+              <p class="text-sm text-green-600 mt-2">12,450 credits</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Average Price per Credit</h4>
+              <p class="text-3xl font-bold text-gray-800">₹65.84</p>
+              <p class="text-sm text-blue-600 mt-2">Market rate</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Pending Orders</h4>
+              <p class="text-3xl font-bold text-gray-800">3</p>
+              <p class="text-sm text-yellow-600 mt-2">Under processing</p>
+            </div>
+          </div>
+          <div class="data-table">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h4 class="text-lg font-semibold text-gray-800">Recent Purchase Orders</h4><button
+                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm">
+                + New Purchase </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Order ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Category</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Quantity</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Amount</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">PO-2024-1523</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Jan 10, 2024</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">PWMR Credits</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">5,000</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">₹3,29,200</td>
+                    <td class="px-6 py-4"><span class="badge badge-success">Completed</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">PO-2024-1522</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Jan 08, 2024</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">EWMR Credits</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">3,500</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">₹2,30,440</td>
+                    <td class="px-6 py-4"><span class="badge badge-warning">Processing</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">PO-2024-1521</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Jan 05, 2024</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">BWMR Credits</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">2,000</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">₹1,31,680</td>
+                    <td class="px-6 py-4"><span class="badge badge-success">Completed</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div><!-- EPR Consumption -->
+        <div id="epr-consumption-section" class="content-section">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Total Consumed (YTD)</h4>
+              <p class="text-3xl font-bold text-gray-800">38,450</p>
+              <p class="text-sm text-gray-600 mt-2">Credits utilized</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">This Month</h4>
+              <p class="text-3xl font-bold text-gray-800">4,280</p>
+              <p class="text-sm text-blue-600 mt-2">↑ 8% vs last month</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Remaining Balance</h4>
+              <p class="text-3xl font-bold text-gray-800">6,780</p>
+              <p class="text-sm text-green-600 mt-2">Available credits</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Consumption Rate</h4>
+              <p class="text-3xl font-bold text-gray-800">85%</p>
+              <p class="text-sm text-gray-600 mt-2">Target achievement</p>
+            </div>
+          </div>
+          <div class="chart-container mb-6">
+            <h4 class="text-lg font-semibold text-gray-800 mb-4">Category-wise Consumption</h4>
+            <div class="space-y-4">
+              <div>
+                <div class="flex justify-between text-sm mb-2"><span class="text-gray-600">PWMR (Plastic Waste)</span>
+                  <span class="font-semibold text-gray-800">15,230 credits (40%)</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill"
+                    style="width: 40%; background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-sm mb-2"><span class="text-gray-600">EWMR (E-Waste)</span> <span
+                    class="font-semibold text-gray-800">12,680 credits (33%)</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill"
+                    style="width: 33%; background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-sm mb-2"><span class="text-gray-600">BWMR (Battery Waste)</span>
+                  <span class="font-semibold text-gray-800">10,540 credits (27%)</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill"
+                    style="width: 27%; background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="data-table">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-800">Recent Consumption History</h4>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Transaction ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Category</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Credits Used</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Purpose</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Balance</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm text-gray-600">TXN-2024-8923</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Jan 11, 2024</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">PWMR</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">850</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Q4 Compliance</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">6,780</td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm text-gray-600">TXN-2024-8922</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Jan 09, 2024</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">EWMR</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">1,200</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Annual Filing</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">7,630</td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm text-gray-600">TXN-2024-8921</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Jan 07, 2024</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">BWMR</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">650</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Monthly Target</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">8,830</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div><!-- EPR Credits -->
+        <div id="epr-credits-section" class="content-section">
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Total Available Credits</h4>
+              <p class="text-3xl font-bold text-gray-800">45,230</p>
+              <p class="text-sm text-green-600 mt-2">Active balance</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Credits Purchased</h4>
+              <p class="text-3xl font-bold text-gray-800">84,210</p>
+              <p class="text-sm text-blue-600 mt-2">All-time</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Credits Utilized</h4>
+              <p class="text-3xl font-bold text-gray-800">38,980</p>
+              <p class="text-sm text-purple-600 mt-2">46% utilization</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Expiring Soon</h4>
+              <p class="text-3xl font-bold text-gray-800">2,450</p>
+              <p class="text-sm text-red-600 mt-2">Within 30 days</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="chart-container">
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">Credits by Category</h4>
+              <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="font-semibold text-gray-800">PWMR Credits</p>
+                      <p class="text-xs text-gray-500">Plastic Waste Management</p>
+                    </div>
+                  </div>
+                  <p class="text-xl font-bold text-gray-800">18,240</p>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="font-semibold text-gray-800">EWMR Credits</p>
+                      <p class="text-xs text-gray-500">E-Waste Management</p>
+                    </div>
+                  </div>
+                  <p class="text-xl font-bold text-gray-800">15,680</p>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
+                      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="font-semibold text-gray-800">BWMR Credits</p>
+                      <p class="text-xs text-gray-500">Battery Waste Management</p>
+                    </div>
+                  </div>
+                  <p class="text-xl font-bold text-gray-800">11,310</p>
+                </div>
+              </div>
+            </div>
+            <div class="chart-container">
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">Credit Validity Status</h4>
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between text-sm mb-2"><span class="text-gray-600">Valid (&gt;6 months)</span>
+                    <span class="font-semibold text-green-600">32,450 credits</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill"
+                      style="width: 72%; background: linear-gradient(90deg, #10b981 0%, #059669 100%);"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm mb-2"><span class="text-gray-600">Expiring (3-6
+                      months)</span> <span class="font-semibold text-yellow-600">10,330 credits</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill"
+                      style="width: 23%; background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm mb-2"><span class="text-gray-600">Expiring Soon (&lt;3
+                      months)</span> <span class="font-semibold text-red-600">2,450 credits</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill"
+                      style="width: 5%; background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- Account Wise View -->
+        <div id="account-view-section" class="content-section">
+          <div class="data-table">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-800">Account-wise EPR Summary</h4>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Account Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Entity Type</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Available Credits</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Utilized (YTD)</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Compliance %</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">Manufacturing Unit - Delhi</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Producer</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">15,230</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">12,450</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">96%</td>
+                    <td class="px-6 py-4"><span class="badge badge-success">Active</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">Distribution Hub - Mumbai</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Brand Owner</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">8,450</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">7,820</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">92%</td>
+                    <td class="px-6 py-4"><span class="badge badge-success">Active</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">Processing Center - Bangalore</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Recycler</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">12,680</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">9,230</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">88%</td>
+                    <td class="px-6 py-4"><span class="badge badge-warning">Attention Needed</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">Retail Operations - Chennai</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Importer</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">8,870</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">8,480</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">94%</td>
+                    <td class="px-6 py-4"><span class="badge badge-success">Active</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div><!-- Real Time Data Status -->
+        <div id="real-time-section" class="content-section">
+          <div class="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded">
+            <div class="flex items-center space-x-2">
+              <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              <p class="text-sm font-medium text-green-800">Live Data - Last updated: Just now</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Active Transactions</h4>
+              <p class="text-3xl font-bold text-gray-800">42</p>
+              <p class="text-sm text-green-600 mt-2">Processing now</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Data Sync Status</h4>
+              <p class="text-3xl font-bold text-gray-800">100%</p>
+              <p class="text-sm text-green-600 mt-2">All systems synced</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">API Calls (Last Hour)</h4>
+              <p class="text-3xl font-bold text-gray-800">1,847</p>
+              <p class="text-sm text-blue-600 mt-2">Normal traffic</p>
+            </div>
+          </div>
+          <div class="data-table">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-800">Live Transaction Feed</h4>
+            </div>
+            <div class="p-6 space-y-3 max-h-96 overflow-y-auto">
+              <div class="flex items-center justify-between p-3 bg-green-50 border-l-4 border-green-500 rounded">
+                <div class="flex items-center space-x-3">
+                  <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-800">Credit Purchase Completed</p>
+                    <p class="text-xs text-gray-500">EPR-2024-001 • 5,000 PWMR credits</p>
+                  </div>
+                </div><span class="text-xs text-gray-500">2s ago</span>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-blue-50 border-l-4 border-blue-500 rounded">
+                <div class="flex items-center space-x-3">
+                  <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-800">Report Submitted</p>
+                    <p class="text-xs text-gray-500">Q4 Compliance Report • XYZ Electronics</p>
+                  </div>
+                </div><span class="text-xs text-gray-500">15s ago</span>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-yellow-50 border-l-4 border-yellow-500 rounded">
+                <div class="flex items-center space-x-3">
+                  <div class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-800">Credits Consumed</p>
+                    <p class="text-xs text-gray-500">Green Industries • 850 BWMR credits</p>
+                  </div>
+                </div><span class="text-xs text-gray-500">32s ago</span>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-purple-50 border-l-4 border-purple-500 rounded">
+                <div class="flex items-center space-x-3">
+                  <div class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-800">Account Updated</p>
+                    <p class="text-xs text-gray-500">Tech Solutions • Profile information</p>
+                  </div>
+                </div><span class="text-xs text-gray-500">1m ago</span>
+              </div>
+            </div>
+          </div>
+        </div><!-- BWMR Section -->
+        <div id="bwmr-section" class="content-section">
+          <div class="mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Battery Waste Management Rules (BWMR)</h3>
+            <p class="text-sm text-gray-500 mt-1">Monitor and manage battery waste compliance</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Total Collection (MT)</h4>
+              <p class="text-3xl font-bold text-gray-800">8,450</p>
+              <p class="text-sm text-green-600 mt-2">↑ 12% this quarter</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Recycling Rate</h4>
+              <p class="text-3xl font-bold text-gray-800">89%</p>
+              <p class="text-sm text-blue-600 mt-2">Above target</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Registered Entities</h4>
+              <p class="text-3xl font-bold text-gray-800">68</p>
+              <p class="text-sm text-gray-600 mt-2">Active producers</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Compliance Score</h4>
+              <p class="text-3xl font-bold text-gray-800">88%</p>
+              <p class="text-sm text-green-600 mt-2">Strong performance</p>
+            </div>
+          </div>
+          <div class="data-table">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-800">BWMR Collection Data</h4>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Entity Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Battery Type</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Collected (MT)</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Recycled (MT)</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Rate</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">PowerCell Industries</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Lead-Acid</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">3,240</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">2,916</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">90%</td>
+                    <td class="px-6 py-4"><span class="badge badge-success">Compliant</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">EnergyTech Solutions</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Lithium-Ion</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">2,850</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">2,508</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">88%</td>
+                    <td class="px-6 py-4"><span class="badge badge-success">Compliant</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">BatteryPro Corp</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Nickel-Cadmium</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">1,460</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">1,226</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">84%</td>
+                    <td class="px-6 py-4"><span class="badge badge-warning">Partial</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">GreenPower Systems</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">Mixed Types</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">900</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">828</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">92%</td>
+                    <td class="px-6 py-4"><span class="badge badge-success">Compliant</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div><!-- AI Insights Section -->
+        <div id="ai-insights-section" class="content-section">
+          <div class="mb-6">
+            <div class="relative overflow-hidden rounded-2xl p-8"
+              style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+              <div class="relative z-10">
+                <div class="flex items-center space-x-3 mb-4">
+                  <div
+                    class="w-12 h-12 bg-white bg-opacity-20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <h3 class="text-2xl font-bold text-white">AI-Powered Insights</h3>
+                </div>
+                <p class="text-white text-opacity-90">Intelligent analysis and predictions for your EPR compliance</p>
+              </div>
+              <div class="absolute top-0 right-0 w-64 h-64 bg-white bg-opacity-10 rounded-full -mr-32 -mt-32"></div>
+              <div class="absolute bottom-0 left-0 w-48 h-48 bg-white bg-opacity-10 rounded-full -ml-24 -mb-24"></div>
+            </div>
+          </div><!-- AI Insight Cards -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6"><!-- Predictive Analytics Card -->
+            <div
+              class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 p-6 text-white">
+              <div class="absolute top-0 right-0 w-32 h-32 bg-white bg-opacity-10 rounded-full -mr-16 -mt-16"></div>
+              <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                  <div
+                    class="w-14 h-14 bg-white bg-opacity-20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                    </svg>
+                  </div><span
+                    class="px-3 py-1 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-xs font-semibold">Predictive</span>
+                </div>
+                <h4 class="text-xl font-bold mb-2">Compliance Forecast</h4>
+                <p class="text-white text-opacity-90 text-sm mb-4">Based on current trends, you're likely to achieve 97%
+                  compliance by Q2 2024</p>
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between text-sm"><span
+                      class="text-white text-opacity-80">Confidence Level</span> <span class="font-semibold">92%</span>
+                  </div>
+                  <div class="h-2 bg-white bg-opacity-20 rounded-full overflow-hidden">
+                    <div class="h-full bg-white rounded-full" style="width: 92%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div><!-- Anomaly Detection Card -->
+            <div
+              class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 p-6 text-white">
+              <div class="absolute bottom-0 left-0 w-32 h-32 bg-white bg-opacity-10 rounded-full -ml-16 -mb-16"></div>
+              <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                  <div
+                    class="w-14 h-14 bg-white bg-opacity-20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div><span
+                    class="px-3 py-1 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-xs font-semibold">Alert</span>
+                </div>
+                <h4 class="text-xl font-bold mb-2">Anomaly Detected</h4>
+                <p class="text-white text-opacity-90 text-sm mb-4">Unusual spike in BWMR consumption detected in Mumbai
+                  region</p>
+                <div class="flex items-center space-x-2">
+                  <div class="flex-1 h-2 bg-white bg-opacity-20 rounded-full overflow-hidden">
+                    <div class="h-full bg-yellow-300 rounded-full animate-pulse" style="width: 78%;"></div>
+                  </div><span class="text-xs font-semibold">High Risk</span>
+                </div>
+              </div>
+            </div>
+          </div><!-- Smart Recommendations -->
+          <div class="stat-card p-6 mb-6">
+            <div class="flex items-center space-x-3 mb-6">
+              <div
+                class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-800">AI Recommendations</h4>
+            </div>
+            <div class="space-y-4">
+              <div
+                class="flex items-start space-x-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-l-4 border-green-500">
+                <div
+                  class="flex-shrink-0 w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                  1
+                </div>
+                <div class="flex-1">
+                  <h5 class="font-semibold text-gray-800 mb-1">Optimize PWMR Credit Purchase</h5>
+                  <p class="text-sm text-gray-600 mb-2">Purchase 3,200 PWMR credits now to save ₹48,000 based on
+                    predicted price increase</p>
+                  <div class="flex items-center space-x-4 text-xs text-gray-500"><span
+                      class="flex items-center space-x-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg><span>Best by: Jan 18</span> </span> <span class="flex items-center space-x-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg><span>Impact: High</span> </span>
+                  </div>
+                </div><button
+                  class="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">Act
+                  Now</button>
+              </div>
+              <div
+                class="flex items-start space-x-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border-l-4 border-blue-500">
+                <div
+                  class="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                  2
+                </div>
+                <div class="flex-1">
+                  <h5 class="font-semibold text-gray-800 mb-1">Redistribute E-Waste Collection</h5>
+                  <p class="text-sm text-gray-600 mb-2">Chennai center is underutilized (45% capacity). Transfer 800 MT
+                    from Bangalore for efficiency</p>
+                  <div class="flex items-center space-x-4 text-xs text-gray-500"><span
+                      class="flex items-center space-x-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg><span>Savings: ₹22,500</span> </span> <span class="flex items-center space-x-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg><span>Impact: Medium</span> </span>
+                  </div>
+                </div><button
+                  class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors">Review</button>
+              </div>
+              <div
+                class="flex items-start space-x-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-l-4 border-purple-500">
+                <div
+                  class="flex-shrink-0 w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                  3
+                </div>
+                <div class="flex-1">
+                  <h5 class="font-semibold text-gray-800 mb-1">Early Compliance Filing</h5>
+                  <p class="text-sm text-gray-600 mb-2">Submit Q4 report by Jan 13 to avoid potential regulatory delays
+                    during peak period</p>
+                  <div class="flex items-center space-x-4 text-xs text-gray-500"><span
+                      class="flex items-center space-x-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg><span>Risk Reduction: 85%</span> </span> <span class="flex items-center space-x-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg><span>Impact: Low</span> </span>
+                  </div>
+                </div><button
+                  class="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm font-medium hover:bg-purple-600 transition-colors">Schedule</button>
+              </div>
+            </div>
+          </div><!-- Trend Analysis -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="stat-card p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-sm font-medium text-gray-500">Credit Price Trend</h4>
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+              <p class="text-2xl font-bold text-gray-800 mb-2">₹68.50</p>
+              <p class="text-sm text-green-600">↑ 4.2% (predicted rise)</p>
+              <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-xs text-gray-500">AI suggests buying before Jan 20</p>
+              </div>
+            </div>
+            <div class="stat-card p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-sm font-medium text-gray-500">Compliance Efficiency</h4>
+                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <p class="text-2xl font-bold text-gray-800 mb-2">94.8%</p>
+              <p class="text-sm text-blue-600">Above industry average</p>
+              <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-xs text-gray-500">Top 15% in your sector</p>
+              </div>
+            </div>
+            <div class="stat-card p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-sm font-medium text-gray-500">Risk Score</h4>
+                <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <p class="text-2xl font-bold text-gray-800 mb-2">Low</p>
+              <p class="text-sm text-yellow-600">2 minor alerts pending</p>
+              <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-xs text-gray-500">No critical risks detected</p>
+              </div>
+            </div>
+          </div>
+        </div><!-- AI Copilot Chat Section -->
+        <div id="ai-copilot-section" class="content-section">
+          <div class="h-full flex flex-col" style="max-height: calc(100vh - 120px);"><!-- Chat Header -->
+            <div class="relative overflow-hidden rounded-t-2xl p-6 mb-6"
+              style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+              <div class="relative z-10 flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                  <div
+                    class="w-12 h-12 bg-white bg-opacity-20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-2xl font-bold text-white">AI Copilot</h3>
+                    <p class="text-white text-opacity-90 text-sm">Ask me anything about EPR compliance</p>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div><span
+                    class="text-white text-sm font-medium">Online</span>
+                </div>
+              </div>
+              <div class="absolute top-0 right-0 w-48 h-48 bg-white bg-opacity-10 rounded-full -mr-24 -mt-24"></div>
+            </div><!-- Suggested Questions -->
+            <div class="mb-6">
+              <p class="text-sm font-medium text-gray-600 mb-3">Suggested questions:</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3"><button
+                  class="text-left p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200 hover:border-purple-400 hover:shadow-md transition-all">
+                  <div class="flex items-start space-x-3">
+                    <svg class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                      viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                      <p class="text-sm font-semibold text-gray-800">How can I reduce my PWMR compliance costs?</p>
+                    </div>
+                  </div>
+                </button> <button
+                  class="text-left p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200 hover:border-blue-400 hover:shadow-md transition-all">
+                  <div class="flex items-start space-x-3">
+                    <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                      viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                      <p class="text-sm font-semibold text-gray-800">What are the upcoming deadlines for my account?</p>
+                    </div>
+                  </div>
+                </button> <button
+                  class="text-left p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 hover:border-green-400 hover:shadow-md transition-all">
+                  <div class="flex items-start space-x-3">
+                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                      viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                      <p class="text-sm font-semibold text-gray-800">Explain the difference between PWMR and EWMR</p>
+                    </div>
+                  </div>
+                </button> <button
+                  class="text-left p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border border-yellow-200 hover:border-yellow-400 hover:shadow-md transition-all">
+                  <div class="flex items-start space-x-3">
+                    <svg class="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                      viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                      <p class="text-sm font-semibold text-gray-800">Show me my credit utilization trends</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div><!-- Chat Messages Area -->
+            <div class="flex-1 stat-card rounded-2xl overflow-hidden flex flex-col">
+              <div class="flex-1 p-6 overflow-y-auto space-y-4" id="chat-messages"><!-- AI Welcome Message -->
+                <div class="flex items-start space-x-3">
+                  <div
+                    class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <div class="flex-1 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl rounded-tl-none p-4">
+                    <p class="text-sm text-gray-800">Hello! I'm your EPR Copilot. I can help you with compliance
+                      questions, data analysis, recommendations, and more. What would you like to know?</p><span
+                      class="text-xs text-gray-500 mt-2 block">Just now</span>
+                  </div>
+                </div>
+              </div><!-- Chat Input -->
+              <div class="p-4 border-t border-gray-200">
+                <form id="chat-form" class="flex items-end space-x-3"><label for="chat-input" class="sr-only">Type your
+                    message</label>
+                  <div class="flex-1 relative"><textarea id="chat-input" rows="1"
+                      class="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:border-purple-400 focus:outline-none resize-none"
+                      placeholder="Ask me anything about EPR compliance..." style="max-height: 120px;"></textarea>
+                    <button type="button"
+                      class="absolute right-2 bottom-2 p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                      </svg></button>
+                  </div><button type="submit"
+                    class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg></button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div><!-- EWMR Section -->
+        <div id="ewmr-section" class="content-section">
+          <div class="mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">E-Waste Management Rules (EWMR)</h3>
+            <p class="text-sm text-gray-500 mt-1">Track electronic waste collection and recycling</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Total E-Waste (MT)</h4>
+              <p class="text-3xl font-bold text-gray-800">12,680</p>
+              <p class="text-sm text-green-600 mt-2">↑ 18% YoY</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Processing Rate</h4>
+              <p class="text-3xl font-bold text-gray-800">95%</p>
+              <p class="text-sm text-green-600 mt-2">Excellent</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Collection Centers</h4>
+              <p class="text-3xl font-bold text-gray-800">142</p>
+              <p class="text-sm text-blue-600 mt-2">Nationwide</p>
+            </div>
+            <div class="stat-card p-6">
+              <h4 class="text-gray-500 text-sm font-medium mb-2">Compliance Rate</h4>
+              <p class="text-3xl font-bold text-gray-800">96%</p>
+              <p class="text-sm text-green-600 mt-2">Industry leader</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="chart-container">
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">E-Waste by Product Category</h4>
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between text-sm mb-2"><span class="text-gray-600">IT &amp; Telecom
+                      Equipment</span> <span class="font-semibold text-gray-800">5,240 MT (41%)</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 41%;"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm mb-2"><span class="text-gray-600">Consumer Electronics</span>
+                    <span class="font-semibold text-gray-800">4,120 MT (33%)</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 33%;"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm mb-2"><span class="text-gray-600">Home Appliances</span>
+                    <span class="font-semibold text-gray-800">2,280 MT (18%)</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 18%;"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm mb-2"><span class="text-gray-600">Medical Equipment</span>
+                    <span class="font-semibold text-gray-800">1,040 MT (8%)</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 8%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="data-table">
+              <div class="px-6 py-4 border-b border-gray-200">
+                <h4 class="text-lg font-semibold text-gray-800">Top Recycling Partners</h4>
+              </div>
+              <div class="p-6 space-y-3">
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p class="font-semibold text-gray-800">EcoRecycle India</p>
+                    <p class="text-xs text-gray-500">Authorized Recycler</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="font-bold text-gray-800">4,850 MT</p><span class="badge badge-success">Active</span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p class="font-semibold text-gray-800">GreenTech Recyclers</p>
+                    <p class="text-xs text-gray-500">Certified Partner</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="font-bold text-gray-800">3,920 MT</p><span class="badge badge-success">Active</span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p class="font-semibold text-gray-800">Waste Solutions Ltd</p>
+                    <p class="text-xs text-gray-500">Registered Facility</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="font-bold text-gray-800">2,680 MT</p><span class="badge badge-success">Active</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+</body>
+<script src="assets/js/custom.js"></script>
+
+</html>

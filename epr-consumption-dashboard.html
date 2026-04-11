@@ -1,0 +1,2389 @@
+<!doctype html>
+<html lang="en" class="h-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EPR Consumption Dashboard</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap"
+    rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          borderWidth: {
+            3: '3px',
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            primary: '#0f172a',
+            secondary: '#1e293b',
+            accent: '#3b82f6',
+            success: '#10b981',
+            warning: '#f59e0b',
+            danger: '#ef4444',
+            surface: '#f8fafc',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
+
+    .app-wrapper {
+      min-height: 100%;
+      width: 100%;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Table styles */
+    .data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .data-table th {
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      color: white;
+      font-weight: 600;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+
+    .data-table th:hover {
+      background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    }
+
+    .data-table th:first-child {
+      border-radius: 8px 0 0 0;
+    }
+
+    .data-table th:last-child {
+      border-radius: 0 8px 0 0;
+    }
+
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.875rem;
+      color: #334155;
+    }
+
+    .data-table tbody tr {
+      transition: all 0.15s ease;
+    }
+
+    .data-table tbody tr:hover {
+      background: #f1f5f9;
+    }
+
+    .data-table tbody tr.total-row {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      font-weight: 700;
+    }
+
+    .data-table tbody tr.total-row td {
+      border-top: 2px solid #3b82f6;
+      color: #0f172a;
+    }
+
+    /* Sort indicator */
+    .sort-indicator {
+      display: inline-block;
+      margin-left: 4px;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+
+    .sort-indicator.active {
+      opacity: 1;
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      z-index: 1001;
+      max-width: 90vw;
+      max-height: 85%;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .modal-content.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* Action button */
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Download button */
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Search input */
+    .search-input {
+      padding: 10px 16px 10px 44px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Card styles */
+    .dashboard-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .dashboard-card:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-compliant {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-deficit {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Pagination */
+    .pagination-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pagination-btn:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .pagination-btn.active {
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Rating stars */
+    .rating-star {
+      color: #fbbf24;
+    }
+
+    .rating-star.empty {
+      color: #e2e8f0;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-in-up {
+      animation: fadeInUp 0.4s ease forwards;
+    }
+
+    /* Tab styles */
+    .tab-btn {
+      padding: 12px 24px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #64748b;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      cursor: pointer;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+
+    .tab-btn:hover {
+      color: #3b82f6;
+    }
+
+    .tab-btn.active {
+      color: #3b82f6;
+      border-bottom-color: #3b82f6;
+    }
+  </style>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+  </style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+</head>
+
+<body class="h-full bg-slate-100">
+  <div class="app-wrapper w-full min-h-full flex flex-col">
+    <header class="bg-white shadow-md z-20 flex-shrink-0">
+      <div class="px-6 py-4 flex items-center justify-between border-b border-gray-200">
+        <div class="flex items-center space-x-6">
+          <div class="flex items-center space-x-4">
+            <div
+              class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-600 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+              </svg>
+            </div>
+            <div>
+              <h1 id="dashboard-title" class="text-gray-800 font-bold text-xl leading-tight">EPR Compliance
+                Dashboard</h1>
+              <p id="company-name" class="text-gray-500 text-xs">Enterprise Compliance Management</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+            <button class="epr-category-tab active px-6 py-2 rounded-md font-semibold text-sm transition-all"
+              data-category="pwmr"> PWMR </button>
+            <button class="epr-category-tab px-6 py-2 rounded-md font-semibold text-sm transition-all"
+              data-category="bwmr"> BWMR </button>
+            <button class="epr-category-tab px-6 py-2 rounded-md font-semibold text-sm transition-all"
+              data-category="ewmr"> EWMR </button>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <button id="fiscal-year-btn" type="button"
+              class="px-4 py-2 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-green-500 focus:outline-none text-sm flex items-center gap-2 transition-colors">
+              <div>
+                <span class="text-gray-500 text-xs">Fiscal Year</span>
+                <span class="block text-gray-900 font-semibold text-sm" id="fiscal-year-display">2024-25</span>
+              </div>
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </button>
+            <div id="fiscal-year-dropdown"
+              class="hidden absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-40 min-w-max">
+              <button
+                class="fy-option w-full text-left px-4 py-2 text-gray-900 font-semibold hover:bg-gray-50 transition-colors text-sm first:rounded-t-lg"
+                data-fy="2024-25">2024-25 (Current)</button>
+              <button
+                class="fy-option w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-50 transition-colors text-sm"
+                data-fy="2023-24">2023-24</button>
+              <button
+                class="fy-option w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-50 transition-colors text-sm"
+                data-fy="2022-23">2022-23</button>
+              <button
+                class="fy-option w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-50 transition-colors text-sm last:rounded-b-lg"
+                data-fy="2021-22">2021-22</button>
+            </div>
+          </div>
+          <div class="px-4 py-2 bg-green-50 rounded-lg border border-green-200">
+            <span class="text-green-700 text-xs">Status</span>
+            <span class="block text-green-800 font-semibold text-sm">Compliant</span>
+          </div>
+          <button type="button" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+          </button>
+          <div
+            class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center">
+            <span class="text-white font-semibold text-sm">AD</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="px-6 bg-gradient-to-r from-slate-800 to-slate-700">
+        <div class="flex items-center space-x-1 flex-wrap">
+          <a href="index.html#home-section"
+            class="nav-item px-6 py-4 text-white flex items-center space-x-2 cursor-pointer border-b-3 border-transparent hover:bg-white hover:bg-opacity-10 no-underline">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg><span class="font-medium text-sm whitespace-nowrap">Home Dashboard</span>
+          </a>
+          <a href="index.html#leadership-section"
+            class="nav-item px-6 py-4 text-white flex items-center space-x-2 cursor-pointer border-b-3 border-transparent hover:bg-white hover:bg-opacity-10 no-underline">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg><span class="font-medium text-sm whitespace-nowrap">Leadership All EPR Dashboard</span>
+          </a>
+          <a href="index.html#calendar-section"
+            class="nav-item px-6 py-4 text-white flex items-center space-x-2 cursor-pointer border-b-3 border-transparent hover:bg-white hover:bg-opacity-10 no-underline">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg><span class="font-medium text-sm whitespace-nowrap">Compliance Calendar</span>
+          </a>
+          <div class="relative nav-parent">
+            <div
+              class="nav-item px-6 py-4 text-white flex items-center space-x-2 cursor-pointer border-b-3 border-transparent hover:bg-white hover:bg-opacity-10"
+              data-toggle="main-menu">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg><span class="font-medium text-sm whitespace-nowrap">Menu</span>
+              <svg class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+            <div
+              class="submenu-horizontal absolute top-full left-0 bg-slate-800 shadow-lg rounded-b-lg min-w-[280px] z-30"
+              id="main-menu">
+              <a href="epr-consumption-dashboard.html"
+                class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer no-underline"
+                data-section="epr-compliance">EPR Compliance Dashboard</a>
+              <a href="epr-purchase.html"
+                class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer no-underline"
+                data-section="epr-purchase">EPR Purchase</a>
+              <a href="epr-cons.html"
+                class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer no-underline"
+                data-section="epr-consumption">EPR Consumption</a>
+              <a href="index.html#epr-credits-section"
+                class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer no-underline"
+                data-section="epr-credits">EPR Credits</a>
+              <a href="index.html#account-view-section"
+                class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer no-underline"
+                data-section="account-view">Account Wise View</a>
+              <a href="index.html#real-time-section"
+                class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer rounded-b-lg no-underline"
+                data-section="real-time">Real Time Data Status</a>
+            </div>
+          </div>
+          <div class="h-6 w-px bg-gray-600 mx-2"></div>
+          <a href="index.html#ai-insights-section"
+            class="nav-item px-6 py-4 text-white flex items-center space-x-2 cursor-pointer border-b-3 border-transparent hover:bg-white hover:bg-opacity-10 no-underline">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg><span class="font-medium text-sm whitespace-nowrap">AI Insights</span>
+          </a>
+          <a href="index.html#ai-copilot-section"
+            class="nav-item px-6 py-4 text-white flex items-center space-x-2 cursor-pointer border-b-3 border-transparent hover:bg-white hover:bg-opacity-10 no-underline">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg><span class="font-medium text-sm whitespace-nowrap">AI Copilot</span>
+          </a>
+        </div>
+      </nav>
+      <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
+        <div class="flex items-center space-x-6 flex-wrap gap-y-3">
+          <div class="flex items-center space-x-3">
+            <label for="group-filter" class="text-sm font-medium text-gray-700 whitespace-nowrap">Group:</label>
+            <select id="group-filter"
+              class="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none text-sm min-w-[200px] bg-white">
+              <option value="all">All Groups</option>
+              <option value="global">Global Enterprises Ltd</option>
+              <option value="asia">Asia Pacific Group</option>
+              <option value="india">India Operations</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-3">
+            <label for="entity-filter" class="text-sm font-medium text-gray-700 whitespace-nowrap">Entity:</label>
+            <select id="entity-filter"
+              class="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none text-sm min-w-[240px] bg-white">
+              <option value="all">All Legal Entities</option>
+              <option value="manufacturing">Manufacturing Unit - Delhi</option>
+              <option value="distribution">Distribution Hub - Mumbai</option>
+              <option value="processing">Processing Center - Bangalore</option>
+              <option value="retail">Retail Operations - Chennai</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-3">
+            <label for="user-filter" class="text-sm font-medium text-gray-700 whitespace-nowrap">User View:</label>
+            <select id="user-filter"
+              class="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none text-sm min-w-[180px] bg-white">
+              <option value="aggregated">Aggregated View</option>
+              <option value="individual">Individual View</option>
+              <option value="manager">Manager View</option>
+              <option value="admin">Admin View</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-3">
+            <label for="custom-filter" class="text-sm font-semibold text-gray-700 whitespace-nowrap">Custom View:</label>
+            <select id="custom-filter"
+              class="px-4 py-2 border-2 border-green-300 rounded-lg focus:border-green-500 focus:outline-none text-sm min-w-[200px] bg-white font-medium shadow-sm">
+              <option value="all">All Views</option>
+              <option value="hub">Hub View</option>
+              <option value="location">Location View</option>
+              <option value="regional">Regional View</option>
+              <option value="department">Department View</option>
+              <option value="project">Project View</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="flex-1 overflow-y-auto max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6"><!-- Summary Cards -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up"
+        style="animation-delay: 0.1s">
+        <div class="dashboard-card p-5 cursor-pointer hover:shadow-lg transition-shadow"
+          onclick="showCardModal('Total Categories', 'categories')">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-slate-500 text-sm font-medium">Total Categories</p>
+              <p class="text-3xl font-bold text-slate-900 mt-1">4</p>
+            </div>
+            <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
+              <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-card p-5 cursor-pointer hover:shadow-lg transition-shadow"
+          onclick="showCardModal('Total Quantity', 'quantity')">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-slate-500 text-sm font-medium">Total Quantity</p>
+              <p id="total-qty-card" class="text-3xl font-bold text-slate-900 mt-1">0</p>
+              <p class="text-xs text-slate-400 mt-1">Tons</p>
+            </div>
+            <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
+              <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-card p-5 cursor-pointer hover:shadow-lg transition-shadow"
+          onclick="showCardModal('Avg Recycled %', 'recycled')">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-slate-500 text-sm font-medium">Avg Recycled %</p>
+              <p id="avg-recycled-card" class="text-3xl font-bold text-slate-900 mt-1">0%</p>
+            </div>
+            <div class="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center">
+              <svg class="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-card p-5 cursor-pointer hover:shadow-lg transition-shadow"
+          onclick="showCardModal('YoY Change', 'yoy')">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-slate-500 text-sm font-medium">YoY Change</p>
+              <p id="yoy-change-card" class="text-3xl font-bold text-green-600 mt-1">+0%</p>
+            </div>
+            <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center">
+              <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section><!-- Tab Navigation -->
+      <div class="dashboard-card animate-fade-in-up" style="animation-delay: 0.2s">
+        <div class="border-b border-slate-200 overflow-x-auto">
+          <nav class="flex whitespace-nowrap" role="tablist"><button class="tab-btn active" data-tab="categories"
+              role="tab">Categories Overview</button> <button class="tab-btn" data-tab="registered"
+              role="tab">Registered Customers</button> <button class="tab-btn" data-tab="unregistered"
+              role="tab">Unregistered Customers</button> <button class="tab-btn" data-tab="comparison" role="tab">Year
+              Comparison</button> <button class="tab-btn" data-tab="statewise" role="tab">State-wise
+              Distribution</button>
+          </nav>
+        </div><!-- Tab Contents -->
+        <div class="p-6"><!-- Table 1: Categories Overview -->
+          <div id="tab-categories" class="tab-content">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <h2 class="text-lg font-bold text-slate-900">Categories Overview</h2>
+              <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+                <div class="relative w-full sm:w-auto">
+                  <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none"
+                    stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg><input type="text" id="search-categories" class="search-input"
+                    placeholder="Search categories...">
+                </div><button class="download-btn" onclick="downloadCSV('categories')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg> Download CSV </button>
+              </div>
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+              <table class="data-table" id="table-categories">
+                <thead>
+                  <tr>
+                    <th data-sort="category">Category <span class="sort-indicator">↕</span></th>
+                    <th data-sort="pre">Pre <span class="sort-indicator">↕</span></th>
+                    <th data-sort="post">Post <span class="sort-indicator">↕</span></th>
+                    <th data-sort="export">Export <span class="sort-indicator">↕</span></th>
+                    <th data-sort="total">Total <span class="sort-indicator">↕</span></th>
+                    <th data-sort="recycledPct">% Recycled <span class="sort-indicator">↕</span></th>
+                    <th data-sort="recycledQty">Recycled Qty (Tons) <span class="sort-indicator">↕</span></th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="pagination-categories" class="flex items-center justify-between mt-4"></div>
+          </div><!-- Table 2: Registered Customers -->
+          <div id="tab-registered" class="tab-content hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <h2 class="text-lg font-bold text-slate-900">Registered Customer Details</h2>
+              <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+                <div class="relative w-full sm:w-auto">
+                  <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none"
+                    stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg><input type="text" id="search-registered" class="search-input"
+                    placeholder="Search customers...">
+                </div><button class="download-btn" onclick="downloadCSV('registered')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg> Download CSV </button>
+              </div>
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+              <table class="data-table" id="table-registered">
+                <thead>
+                  <tr>
+                    <th data-sort="category">Category <span class="sort-indicator">↕</span></th>
+                    <th data-sort="customer">Customer <span class="sort-indicator">↕</span></th>
+                    <th data-sort="totalQty">Total Qty (Tons) <span class="sort-indicator">↕</span></th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="pagination-registered" class="flex items-center justify-between mt-4"></div>
+          </div><!-- Table 3: Unregistered Customers -->
+          <div id="tab-unregistered" class="tab-content hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <h2 class="text-lg font-bold text-slate-900">Unregistered Customer Details</h2>
+              <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+                <div class="relative w-full sm:w-auto">
+                  <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none"
+                    stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg><input type="text" id="search-unregistered" class="search-input"
+                    placeholder="Search customers...">
+                </div><button class="download-btn" onclick="downloadCSV('unregistered')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg> Download CSV </button>
+              </div>
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+              <table class="data-table" id="table-unregistered">
+                <thead>
+                  <tr>
+                    <th data-sort="category">Category <span class="sort-indicator">↕</span></th>
+                    <th data-sort="customer">Customer <span class="sort-indicator">↕</span></th>
+                    <th data-sort="totalQty">Total Qty (Tons) <span class="sort-indicator">↕</span></th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="pagination-unregistered" class="flex items-center justify-between mt-4"></div>
+          </div><!-- Table 4: Year Comparison -->
+          <div id="tab-comparison" class="tab-content hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <h2 class="text-lg font-bold text-slate-900">Comparison with Last Year Data</h2>
+              <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+                <div class="relative w-full sm:w-auto">
+                  <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none"
+                    stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg><input type="text" id="search-comparison" class="search-input" placeholder="Search...">
+                </div><button class="download-btn" onclick="downloadCSV('comparison')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg> Download CSV </button>
+              </div>
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+              <table class="data-table" id="table-comparison">
+                <thead>
+                  <tr>
+                    <th data-sort="category">Category <span class="sort-indicator">↕</span></th>
+                    <th id="col-current-fy" data-sort="currentFY">Current FY <span class="sort-indicator">↕</span></th>
+                    <th id="col-previous-fy" data-sort="previousFY">Previous FY <span class="sort-indicator">↕</span>
+                    </th>
+                    <th data-sort="changePct">Change (%) <span class="sort-indicator">↕</span></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="pagination-comparison" class="flex items-center justify-between mt-4"></div>
+          </div><!-- Table 5: State-wise Distribution -->
+          <div id="tab-statewise" class="tab-content hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <h2 class="text-lg font-bold text-slate-900">State-wise Sales Distribution</h2>
+              <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+                <div class="relative w-full sm:w-auto">
+                  <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none"
+                    stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg><input type="text" id="search-statewise" class="search-input" placeholder="Search states...">
+                </div><button class="download-btn" onclick="downloadCSV('statewise')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg> Download CSV </button>
+              </div>
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+              <table class="data-table" id="table-statewise">
+                <thead>
+                  <tr>
+                    <th data-sort="state">State/UT <span class="sort-indicator">↕</span></th>
+                    <th data-sort="cat1">Cat I <span class="sort-indicator">↕</span></th>
+                    <th data-sort="cat2">Cat II <span class="sort-indicator">↕</span></th>
+                    <th data-sort="cat3">Cat III <span class="sort-indicator">↕</span></th>
+                    <th data-sort="cat4">Cat IV <span class="sort-indicator">↕</span></th>
+                    <th data-sort="total">Total <span class="sort-indicator">↕</span></th>
+                    <th data-sort="recycledQty">Recycled Qty <span class="sort-indicator">↕</span></th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div id="pagination-statewise" class="flex items-center justify-between mt-4"></div>
+          </div>
+        </div>
+      </div>
+    </main><!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-6 mt-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <p class="text-sm">© 2024 EPR Compliance Dashboard. All rights reserved.</p>
+      </div>
+    </footer>
+  </div><!-- Modal Overlay -->
+  <div id="modal-overlay" class="modal-overlay" onclick="closeModal()"></div><!-- Modal Content -->
+  <div id="modal-content" class="modal-content">
+    <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-6 py-4 flex items-center justify-between">
+      <h3 id="modal-title" class="text-lg font-bold">Details</h3><button onclick="closeModal()"
+        class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg></button>
+    </div>
+    <div id="modal-body" class="p-6 overflow-auto max-h-96"></div>
+  </div>
+  <script>
+    // ============================================================
+    // CONFIGURATION & CONSTANTS
+    // ============================================================
+    const ITEMS_PER_PAGE = 5;
+
+    const defaultConfig = {
+      dashboard_title: 'EPR Consumption Compliance Dashboard',
+      company_name: 'Enterprise Compliance Management',
+      primary_color: '#0f172a',
+      secondary_color: '#3b82f6',
+      accent_color: '#10b981',
+      text_color: '#334155',
+      background_color: '#f1f5f9',
+      font_family: 'Plus Jakarta Sans'
+    };
+
+    // ============================================================
+    // FISCAL YEAR UTILITIES
+    // ============================================================
+    function getFiscalYear() {
+      const today = new Date();
+      const month = today.getMonth();
+      const year = today.getFullYear();
+
+      // Fiscal year starts in April
+      if (month >= 3) { // April onwards
+        return {
+          current: `${year}-${String(year + 1).slice(-2)}`,
+          previous: `${year - 1}-${String(year).slice(-2)}`,
+          currentStart: year,
+          previousStart: year - 1
+        };
+      } else {
+        return {
+          current: `${year - 1}-${String(year).slice(-2)}`,
+          previous: `${year - 2}-${String(year - 1).slice(-2)}`,
+          currentStart: year - 1,
+          previousStart: year - 2
+        };
+      }
+    }
+
+    const fiscalYear = getFiscalYear();
+
+    // ============================================================
+    // MOCK DATA
+    // ============================================================
+    const mockData = {
+      categories_overview: [
+        { category: 'Cat 1', pre: 1250.5, post: 890.3, export: 340.2, recycledPct: 65.5 },
+        { category: 'Cat 2', pre: 980.0, post: 1120.8, export: 210.4, recycledPct: 72.3 },
+        { category: 'Cat 3', pre: 2100.2, post: 1580.6, export: 520.0, recycledPct: 58.9 },
+        { category: 'Cat 4', pre: 750.8, post: 620.4, export: 180.5, recycledPct: 81.2 }
+      ],
+
+      category_clients: {
+        'Cat 1': [
+          { clientName: 'Alpha Industries', totalQty: 450.2, recycledPct: 68.5 },
+          { clientName: 'Beta Corp', totalQty: 380.5, recycledPct: 62.3 },
+          { clientName: 'Gamma Ltd', totalQty: 290.8, recycledPct: 71.0 },
+          { clientName: 'Delta Inc', totalQty: 360.0, recycledPct: 59.8 }
+        ],
+        'Cat 2': [
+          { clientName: 'Epsilon Group', totalQty: 520.4, recycledPct: 75.2 },
+          { clientName: 'Zeta Systems', totalQty: 410.8, recycledPct: 69.8 },
+          { clientName: 'Eta Solutions', totalQty: 380.0, recycledPct: 72.5 }
+        ],
+        'Cat 3': [
+          { clientName: 'Theta Manufacturing', totalQty: 890.5, recycledPct: 55.3 },
+          { clientName: 'Iota Industries', totalQty: 720.3, recycledPct: 61.2 },
+          { clientName: 'Kappa Corp', totalQty: 590.0, recycledPct: 58.8 }
+        ],
+        'Cat 4': [
+          { clientName: 'Lambda Tech', totalQty: 420.2, recycledPct: 82.5 },
+          { clientName: 'Mu Enterprises', totalQty: 380.5, recycledPct: 79.8 },
+          { clientName: 'Nu Industries', totalQty: 350.0, recycledPct: 81.5 }
+        ]
+      },
+
+      registered_customers: [
+        { category: 'Cat 1', customer: 'TechFlow Solutions', totalQty: 520.8 },
+        { category: 'Cat 1', customer: 'GreenPack Industries', totalQty: 380.5 },
+        { category: 'Cat 2', customer: 'EcoCycle Corp', totalQty: 690.2 },
+        { category: 'Cat 2', customer: 'PackRight Ltd', totalQty: 445.0 },
+        { category: 'Cat 3', customer: 'SustainaPack', totalQty: 820.5 },
+        { category: 'Cat 3', customer: 'RecycleMax', totalQty: 560.3 },
+        { category: 'Cat 4', customer: 'CleanWrap Inc', totalQty: 390.8 },
+        { category: 'Cat 4', customer: 'EcoBox Solutions', totalQty: 280.4 }
+      ],
+
+      registered_suppliers: {
+        'TechFlow Solutions': [
+          { supplierName: 'Raw Material Co', totalQty: 180.5, lastSupplyDate: '2024-11-15', rating: 4.5 },
+          { supplierName: 'Polymer Plus', totalQty: 150.3, lastSupplyDate: '2024-11-10', rating: 4.2 },
+          { supplierName: 'PackMat Ltd', totalQty: 190.0, lastSupplyDate: '2024-11-08', rating: 4.8 }
+        ],
+        'GreenPack Industries': [
+          { supplierName: 'EcoSupply Inc', totalQty: 200.5, lastSupplyDate: '2024-11-12', rating: 4.6 },
+          { supplierName: 'GreenMat Corp', totalQty: 180.0, lastSupplyDate: '2024-11-05', rating: 4.3 }
+        ],
+        'EcoCycle Corp': [
+          { supplierName: 'CycleRaw Ltd', totalQty: 280.2, lastSupplyDate: '2024-11-18', rating: 4.7 },
+          { supplierName: 'EcoRaw Inc', totalQty: 220.0, lastSupplyDate: '2024-11-14', rating: 4.4 },
+          { supplierName: 'RecycleSupply', totalQty: 190.0, lastSupplyDate: '2024-11-10', rating: 4.1 }
+        ],
+        'PackRight Ltd': [
+          { supplierName: 'PackSource Co', totalQty: 245.0, lastSupplyDate: '2024-11-16', rating: 4.5 },
+          { supplierName: 'RightMat Inc', totalQty: 200.0, lastSupplyDate: '2024-11-09', rating: 4.2 }
+        ],
+        'SustainaPack': [
+          { supplierName: 'SustainSupply', totalQty: 320.5, lastSupplyDate: '2024-11-17', rating: 4.9 },
+          { supplierName: 'GreenSource Ltd', totalQty: 280.0, lastSupplyDate: '2024-11-13', rating: 4.6 },
+          { supplierName: 'EcoPack Raw', totalQty: 220.0, lastSupplyDate: '2024-11-08', rating: 4.3 }
+        ],
+        'RecycleMax': [
+          { supplierName: 'MaxSupply Corp', totalQty: 280.3, lastSupplyDate: '2024-11-15', rating: 4.4 },
+          { supplierName: 'RecycleMat Inc', totalQty: 280.0, lastSupplyDate: '2024-11-11', rating: 4.2 }
+        ],
+        'CleanWrap Inc': [
+          { supplierName: 'CleanMat Co', totalQty: 200.8, lastSupplyDate: '2024-11-14', rating: 4.7 },
+          { supplierName: 'WrapSupply Ltd', totalQty: 190.0, lastSupplyDate: '2024-11-09', rating: 4.5 }
+        ],
+        'EcoBox Solutions': [
+          { supplierName: 'BoxRaw Inc', totalQty: 150.4, lastSupplyDate: '2024-11-12', rating: 4.3 },
+          { supplierName: 'EcoMat Supply', totalQty: 130.0, lastSupplyDate: '2024-11-06', rating: 4.1 }
+        ]
+      },
+
+      unregistered_customers: [
+        { category: 'Cat 1', customer: 'QuickPack Ltd', totalQty: 180.5 },
+        { category: 'Cat 1', customer: 'FastWrap Co', totalQty: 150.2 },
+        { category: 'Cat 2', customer: 'BudgetBox Inc', totalQty: 220.8 },
+        { category: 'Cat 3', customer: 'ValuePack Corp', totalQty: 310.5 },
+        { category: 'Cat 3', customer: 'SimplePack Ltd', totalQty: 190.0 },
+        { category: 'Cat 4', customer: 'BasicWrap Inc', totalQty: 140.5 }
+      ],
+
+      unregistered_suppliers: {
+        'QuickPack Ltd': [
+          { supplierName: 'QuickRaw Co', totalQty: 100.5, lastSupplyDate: '2024-11-10', rating: 3.2 },
+          { supplierName: 'FastMat Inc', totalQty: 80.0, lastSupplyDate: '2024-11-05', rating: 3.5 }
+        ],
+        'FastWrap Co': [
+          { supplierName: 'SpeedSupply Ltd', totalQty: 80.2, lastSupplyDate: '2024-11-08', rating: 3.0 },
+          { supplierName: 'RapidMat Corp', totalQty: 70.0, lastSupplyDate: '2024-11-03', rating: 3.3 }
+        ],
+        'BudgetBox Inc': [
+          { supplierName: 'CheapRaw Co', totalQty: 120.8, lastSupplyDate: '2024-11-12', rating: 2.8 },
+          { supplierName: 'BudgetMat Ltd', totalQty: 100.0, lastSupplyDate: '2024-11-07', rating: 3.1 }
+        ],
+        'ValuePack Corp': [
+          { supplierName: 'ValueSupply Inc', totalQty: 180.5, lastSupplyDate: '2024-11-14', rating: 3.4 },
+          { supplierName: 'EconomyMat Co', totalQty: 130.0, lastSupplyDate: '2024-11-09', rating: 3.2 }
+        ],
+        'SimplePack Ltd': [
+          { supplierName: 'SimpleRaw Corp', totalQty: 110.0, lastSupplyDate: '2024-11-11', rating: 3.0 },
+          { supplierName: 'BasicSupply Ltd', totalQty: 80.0, lastSupplyDate: '2024-11-06', rating: 2.9 }
+        ],
+        'BasicWrap Inc': [
+          { supplierName: 'BasicMat Co', totalQty: 80.5, lastSupplyDate: '2024-11-10', rating: 3.1 },
+          { supplierName: 'SimpleMat Inc', totalQty: 60.0, lastSupplyDate: '2024-11-04', rating: 2.8 }
+        ]
+      },
+
+      year_comparison: [
+        { category: 'Cat 1', currentFY: 2481.0, previousFY: 2150.5 },
+        { category: 'Cat 2', currentFY: 2311.2, previousFY: 2480.0 },
+        { category: 'Cat 3', currentFY: 4200.8, previousFY: 3890.2 },
+        { category: 'Cat 4', currentFY: 1551.7, previousFY: 1320.8 }
+      ],
+
+      state_distribution: [
+        { state: 'Maharashtra', cat1: 520.5, cat2: 480.2, cat3: 890.0, cat4: 320.5, recycledQty: 885.48 },
+        { state: 'Gujarat', cat1: 380.2, cat2: 420.8, cat3: 720.5, cat4: 280.0, recycledQty: 720.6 },
+        { state: 'Tamil Nadu', cat1: 290.8, cat2: 350.5, cat3: 580.2, cat4: 220.8, recycledQty: 576.92 },
+        { state: 'Karnataka', cat1: 250.0, cat2: 310.2, cat3: 520.8, cat4: 180.5, recycledQty: 504.6 },
+        { state: 'Rajasthan', cat1: 220.5, cat2: 280.0, cat3: 450.2, cat4: 150.8, recycledQty: 440.6 },
+        { state: 'Uttar Pradesh', cat1: 310.2, cat2: 360.5, cat3: 620.0, cat4: 240.2, recycledQty: 612.36 },
+        { state: 'West Bengal', cat1: 180.5, cat2: 220.8, cat3: 380.5, cat4: 140.0, recycledQty: 368.72 },
+        { state: 'Delhi', cat1: 150.2, cat2: 180.5, cat3: 320.8, cat4: 120.5, recycledQty: 308.8 }
+      ],
+
+      state_details: {
+        'Maharashtra': {
+          pre: [
+            { category: 'Cat I', totalQty: 260.2, recycledPct: 68.5 },
+            { category: 'Cat II', totalQty: 240.1, recycledPct: 72.3 },
+            { category: 'Cat III', totalQty: 445.0, recycledPct: 58.2 },
+            { category: 'Cat IV', totalQty: 160.2, recycledPct: 80.5 }
+          ],
+          post: [
+            { category: 'Cat I', totalQty: 182.2, recycledPct: 65.2 },
+            { category: 'Cat II', totalQty: 168.1, recycledPct: 70.8 },
+            { category: 'Cat III', totalQty: 311.5, recycledPct: 55.5 },
+            { category: 'Cat IV', totalQty: 112.2, recycledPct: 78.2 }
+          ],
+          export: [
+            { category: 'Cat I', totalQty: 78.1, recycledPct: 62.0 },
+            { category: 'Cat II', totalQty: 72.0, recycledPct: 68.5 },
+            { category: 'Cat III', totalQty: 133.5, recycledPct: 52.8 },
+            { category: 'Cat IV', totalQty: 48.1, recycledPct: 75.0 }
+          ]
+        },
+        'Gujarat': {
+          pre: [
+            { category: 'Cat I', totalQty: 190.1, recycledPct: 66.2 },
+            { category: 'Cat II', totalQty: 210.4, recycledPct: 70.5 },
+            { category: 'Cat III', totalQty: 360.2, recycledPct: 56.8 },
+            { category: 'Cat IV', totalQty: 140.0, recycledPct: 78.2 }
+          ],
+          post: [
+            { category: 'Cat I', totalQty: 133.1, recycledPct: 63.8 },
+            { category: 'Cat II', totalQty: 147.3, recycledPct: 68.2 },
+            { category: 'Cat III', totalQty: 252.2, recycledPct: 54.2 },
+            { category: 'Cat IV', totalQty: 98.0, recycledPct: 76.0 }
+          ],
+          export: [
+            { category: 'Cat I', totalQty: 57.0, recycledPct: 60.5 },
+            { category: 'Cat II', totalQty: 63.1, recycledPct: 66.0 },
+            { category: 'Cat III', totalQty: 108.1, recycledPct: 51.5 },
+            { category: 'Cat IV', totalQty: 42.0, recycledPct: 73.5 }
+          ]
+        },
+        'Tamil Nadu': {
+          pre: [
+            { category: 'Cat I', totalQty: 145.4, recycledPct: 64.5 },
+            { category: 'Cat II', totalQty: 175.2, recycledPct: 68.8 },
+            { category: 'Cat III', totalQty: 290.1, recycledPct: 55.2 },
+            { category: 'Cat IV', totalQty: 110.4, recycledPct: 76.5 }
+          ],
+          post: [
+            { category: 'Cat I', totalQty: 101.8, recycledPct: 62.2 },
+            { category: 'Cat II', totalQty: 122.7, recycledPct: 66.5 },
+            { category: 'Cat III', totalQty: 203.1, recycledPct: 52.8 },
+            { category: 'Cat IV', totalQty: 77.3, recycledPct: 74.2 }
+          ],
+          export: [
+            { category: 'Cat I', totalQty: 43.6, recycledPct: 58.8 },
+            { category: 'Cat II', totalQty: 52.6, recycledPct: 64.2 },
+            { category: 'Cat III', totalQty: 87.0, recycledPct: 49.5 },
+            { category: 'Cat IV', totalQty: 33.1, recycledPct: 71.8 }
+          ]
+        },
+        'Karnataka': {
+          pre: [
+            { category: 'Cat I', totalQty: 125.0, recycledPct: 63.2 },
+            { category: 'Cat II', totalQty: 155.1, recycledPct: 67.5 },
+            { category: 'Cat III', totalQty: 260.4, recycledPct: 54.0 },
+            { category: 'Cat IV', totalQty: 90.2, recycledPct: 75.2 }
+          ],
+          post: [
+            { category: 'Cat I', totalQty: 87.5, recycledPct: 61.0 },
+            { category: 'Cat II', totalQty: 108.6, recycledPct: 65.2 },
+            { category: 'Cat III', totalQty: 182.3, recycledPct: 51.5 },
+            { category: 'Cat IV', totalQty: 63.2, recycledPct: 73.0 }
+          ],
+          export: [
+            { category: 'Cat I', totalQty: 37.5, recycledPct: 57.5 },
+            { category: 'Cat II', totalQty: 46.5, recycledPct: 62.8 },
+            { category: 'Cat III', totalQty: 78.1, recycledPct: 48.2 },
+            { category: 'Cat IV', totalQty: 27.1, recycledPct: 70.5 }
+          ]
+        },
+        'Rajasthan': {
+          pre: [
+            { category: 'Cat I', totalQty: 110.2, recycledPct: 62.0 },
+            { category: 'Cat II', totalQty: 140.0, recycledPct: 66.2 },
+            { category: 'Cat III', totalQty: 225.1, recycledPct: 52.8 },
+            { category: 'Cat IV', totalQty: 75.4, recycledPct: 74.0 }
+          ],
+          post: [
+            { category: 'Cat I', totalQty: 77.2, recycledPct: 59.5 },
+            { category: 'Cat II', totalQty: 98.0, recycledPct: 64.0 },
+            { category: 'Cat III', totalQty: 157.6, recycledPct: 50.2 },
+            { category: 'Cat IV', totalQty: 52.8, recycledPct: 71.8 }
+          ],
+          export: [
+            { category: 'Cat I', totalQty: 33.1, recycledPct: 56.2 },
+            { category: 'Cat II', totalQty: 42.0, recycledPct: 61.5 },
+            { category: 'Cat III', totalQty: 67.5, recycledPct: 47.0 },
+            { category: 'Cat IV', totalQty: 22.6, recycledPct: 69.2 }
+          ]
+        },
+        'Uttar Pradesh': {
+          pre: [
+            { category: 'Cat I', totalQty: 155.1, recycledPct: 61.5 },
+            { category: 'Cat II', totalQty: 180.2, recycledPct: 65.8 },
+            { category: 'Cat III', totalQty: 310.0, recycledPct: 52.0 },
+            { category: 'Cat IV', totalQty: 120.1, recycledPct: 73.5 }
+          ],
+          post: [
+            { category: 'Cat I', totalQty: 108.6, recycledPct: 59.0 },
+            { category: 'Cat II', totalQty: 126.2, recycledPct: 63.5 },
+            { category: 'Cat III', totalQty: 217.0, recycledPct: 49.5 },
+            { category: 'Cat IV', totalQty: 84.1, recycledPct: 71.2 }
+          ],
+          export: [
+            { category: 'Cat I', totalQty: 46.5, recycledPct: 55.8 },
+            { category: 'Cat II', totalQty: 54.1, recycledPct: 60.8 },
+            { category: 'Cat III', totalQty: 93.0, recycledPct: 46.5 },
+            { category: 'Cat IV', totalQty: 36.0, recycledPct: 68.8 }
+          ]
+        },
+        'West Bengal': {
+          pre: [
+            { category: 'Cat I', totalQty: 90.2, recycledPct: 60.2 },
+            { category: 'Cat II', totalQty: 110.4, recycledPct: 64.5 },
+            { category: 'Cat III', totalQty: 190.2, recycledPct: 51.0 },
+            { category: 'Cat IV', totalQty: 70.0, recycledPct: 72.2 }
+          ],
+          post: [
+            { category: 'Cat I', totalQty: 63.2, recycledPct: 58.0 },
+            { category: 'Cat II', totalQty: 77.3, recycledPct: 62.2 },
+            { category: 'Cat III', totalQty: 133.2, recycledPct: 48.5 },
+            { category: 'Cat IV', totalQty: 49.0, recycledPct: 70.0 }
+          ],
+          export: [
+            { category: 'Cat I', totalQty: 27.1, recycledPct: 54.5 },
+            { category: 'Cat II', totalQty: 33.1, recycledPct: 59.5 },
+            { category: 'Cat III', totalQty: 57.1, recycledPct: 45.2 },
+            { category: 'Cat IV', totalQty: 21.0, recycledPct: 67.5 }
+          ]
+        },
+        'Delhi': {
+          pre: [
+            { category: 'Cat I', totalQty: 75.1, recycledPct: 59.0 },
+            { category: 'Cat II', totalQty: 90.2, recycledPct: 63.2 },
+            { category: 'Cat III', totalQty: 160.4, recycledPct: 50.0 },
+            { category: 'Cat IV', totalQty: 60.2, recycledPct: 71.0 }
+          ],
+          post: [
+            { category: 'Cat I', totalQty: 52.6, recycledPct: 56.8 },
+            { category: 'Cat II', totalQty: 63.2, recycledPct: 61.0 },
+            { category: 'Cat III', totalQty: 112.3, recycledPct: 47.5 },
+            { category: 'Cat IV', totalQty: 42.2, recycledPct: 68.8 }
+          ],
+          export: [
+            { category: 'Cat I', totalQty: 22.5, recycledPct: 53.2 },
+            { category: 'Cat II', totalQty: 27.1, recycledPct: 58.2 },
+            { category: 'Cat III', totalQty: 48.1, recycledPct: 44.0 },
+            { category: 'Cat IV', totalQty: 18.1, recycledPct: 66.2 }
+          ]
+        }
+      }
+    };
+
+    // ============================================================
+    // STATE MANAGEMENT
+    // ============================================================
+    const tableState = {
+      categories: { data: [], filtered: [], sorted: [], page: 1, sortField: null, sortDir: 'asc' },
+      registered: { data: [], filtered: [], sorted: [], page: 1, sortField: null, sortDir: 'asc' },
+      unregistered: { data: [], filtered: [], sorted: [], page: 1, sortField: null, sortDir: 'asc' },
+      comparison: { data: [], filtered: [], sorted: [], page: 1, sortField: null, sortDir: 'asc' },
+      statewise: { data: [], filtered: [], sorted: [], page: 1, sortField: null, sortDir: 'asc' }
+    };
+
+    // ============================================================
+    // UTILITY FUNCTIONS
+    // ============================================================
+    function formatNumber(num, decimals = 2) {
+      return num.toLocaleString('en-IN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    }
+
+    function formatPercent(num) {
+      return num.toFixed(1) + '%';
+    }
+
+    function calculateChange(current, previous) {
+      if (previous === 0) return 0;
+      return ((current - previous) / previous) * 100;
+    }
+
+    function getStatusClass(pct) {
+      if (pct >= 70) return 'status-compliant';
+      if (pct >= 50) return 'status-warning';
+      return 'status-deficit';
+    }
+
+    function getChangeClass(change) {
+      if (change > 0) return 'text-green-600';
+      if (change < 0) return 'text-red-600';
+      return 'text-slate-600';
+    }
+
+    function renderRating(rating) {
+      const fullStars = Math.floor(rating);
+      const hasHalf = rating % 1 >= 0.5;
+      let html = '';
+      for (let i = 0; i < 5; i++) {
+        if (i < fullStars) {
+          html += '<span class="rating-star">★</span>';
+        } else if (i === fullStars && hasHalf) {
+          html += '<span class="rating-star">★</span>';
+        } else {
+          html += '<span class="rating-star empty">★</span>';
+        }
+      }
+      return html + ` <span class="text-slate-500 text-xs">(${rating.toFixed(1)})</span>`;
+    }
+
+    // ============================================================
+    // DATA PROCESSING
+    // ============================================================
+    function processData() {
+      // Categories Overview
+      tableState.categories.data = mockData.categories_overview.map(item => ({
+        ...item,
+        total: item.pre + item.post + item.export,
+        recycledQty: ((item.pre + item.post + item.export) * item.recycledPct) / 100
+      }));
+
+      // Registered Customers
+      tableState.registered.data = mockData.registered_customers;
+
+      // Unregistered Customers
+      tableState.unregistered.data = mockData.unregistered_customers;
+
+      // Year Comparison
+      tableState.comparison.data = mockData.year_comparison.map(item => ({
+        ...item,
+        changePct: calculateChange(item.currentFY, item.previousFY)
+      }));
+
+      // State Distribution
+      tableState.statewise.data = mockData.state_distribution.map(item => ({
+        ...item,
+        total: item.cat1 + item.cat2 + item.cat3 + item.cat4
+      }));
+
+      // Initialize filtered data
+      Object.keys(tableState).forEach(key => {
+        tableState[key].filtered = [...tableState[key].data];
+        tableState[key].sorted = [...tableState[key].data];
+      });
+
+      updateSummaryCards();
+    }
+
+    function updateSummaryCards() {
+      const totalQty = tableState.categories.data.reduce((sum, item) => sum + item.total, 0);
+      const avgRecycled = tableState.categories.data.reduce((sum, item) => sum + item.recycledPct, 0) / tableState.categories.data.length;
+      const totalChange = tableState.comparison.data.reduce((sum, item) => sum + item.changePct, 0) / tableState.comparison.data.length;
+
+      document.getElementById('total-qty-card').textContent = formatNumber(totalQty, 1);
+      document.getElementById('avg-recycled-card').textContent = formatPercent(avgRecycled);
+
+      const yoyElement = document.getElementById('yoy-change-card');
+      yoyElement.textContent = (totalChange >= 0 ? '+' : '') + formatPercent(totalChange);
+      yoyElement.className = `text-3xl font-bold mt-1 ${getChangeClass(totalChange)}`;
+    }
+
+    // ============================================================
+    // SEARCH & FILTER
+    // ============================================================
+    function filterData(tableId, searchTerm) {
+      const state = tableState[tableId];
+      const term = searchTerm.toLowerCase().trim();
+
+      if (!term) {
+        state.filtered = [...state.data];
+      } else {
+        state.filtered = state.data.filter(item => {
+          return Object.values(item).some(val =>
+            String(val).toLowerCase().includes(term)
+          );
+        });
+      }
+
+      state.sorted = [...state.filtered];
+      state.page = 1;
+
+      if (state.sortField) {
+        sortData(tableId, state.sortField, false);
+      }
+
+      renderTable(tableId);
+    }
+
+    // ============================================================
+    // SORTING
+    // ============================================================
+    function sortData(tableId, field, toggle = true) {
+      const state = tableState[tableId];
+
+      if (toggle) {
+        if (state.sortField === field) {
+          state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          state.sortField = field;
+          state.sortDir = 'asc';
+        }
+      }
+
+      state.sorted = [...state.filtered].sort((a, b) => {
+        let valA = a[field];
+        let valB = b[field];
+
+        if (typeof valA === 'string') {
+          valA = valA.toLowerCase();
+          valB = valB.toLowerCase();
+        }
+
+        if (valA < valB) return state.sortDir === 'asc' ? -1 : 1;
+        if (valA > valB) return state.sortDir === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      updateSortIndicators(tableId);
+      renderTable(tableId);
+    }
+
+    function updateSortIndicators(tableId) {
+      const state = tableState[tableId];
+      const table = document.getElementById(`table-${tableId}`);
+
+      table.querySelectorAll('th').forEach(th => {
+        const indicator = th.querySelector('.sort-indicator');
+        if (indicator) {
+          const field = th.dataset.sort;
+          if (field === state.sortField) {
+            indicator.classList.add('active');
+            indicator.textContent = state.sortDir === 'asc' ? '↑' : '↓';
+          } else {
+            indicator.classList.remove('active');
+            indicator.textContent = '↕';
+          }
+        }
+      });
+    }
+
+    // ============================================================
+    // PAGINATION
+    // ============================================================
+    function renderPagination(tableId, totalItems) {
+      const state = tableState[tableId];
+      const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+      const container = document.getElementById(`pagination-${tableId}`);
+
+      if (totalPages <= 1) {
+        container.innerHTML = `<div class="text-sm text-slate-500">Showing ${totalItems} items</div><div></div>`;
+        return;
+      }
+
+      let html = `<div class="text-sm text-slate-500">Showing ${(state.page - 1) * ITEMS_PER_PAGE + 1} - ${Math.min(state.page * ITEMS_PER_PAGE, totalItems)} of ${totalItems}</div>`;
+      html += '<div class="flex gap-1">';
+
+      html += `<button class="pagination-btn" onclick="changePage('${tableId}', ${state.page - 1})" ${state.page === 1 ? 'disabled' : ''}>‹</button>`;
+
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= state.page - 1 && i <= state.page + 1)) {
+          html += `<button class="pagination-btn ${i === state.page ? 'active' : ''}" onclick="changePage('${tableId}', ${i})">${i}</button>`;
+        } else if (i === state.page - 2 || i === state.page + 2) {
+          html += '<span class="px-2 text-slate-400">...</span>';
+        }
+      }
+
+      html += `<button class="pagination-btn" onclick="changePage('${tableId}', ${state.page + 1})" ${state.page === totalPages ? 'disabled' : ''}>›</button>`;
+      html += '</div>';
+
+      container.innerHTML = html;
+    }
+
+    function changePage(tableId, page) {
+      const state = tableState[tableId];
+      const totalPages = Math.ceil(state.sorted.length / ITEMS_PER_PAGE);
+
+      if (page < 1 || page > totalPages) return;
+
+      state.page = page;
+      renderTable(tableId);
+    }
+
+    // ============================================================
+    // TABLE RENDERING
+    // ============================================================
+    function getPageData(tableId) {
+      const state = tableState[tableId];
+      const start = (state.page - 1) * ITEMS_PER_PAGE;
+      return state.sorted.slice(start, start + ITEMS_PER_PAGE);
+    }
+
+    function renderTable(tableId) {
+      switch (tableId) {
+        case 'categories': renderCategoriesTable(); break;
+        case 'registered': renderRegisteredTable(); break;
+        case 'unregistered': renderUnregisteredTable(); break;
+        case 'comparison': renderComparisonTable(); break;
+        case 'statewise': renderStatewiseTable(); break;
+      }
+    }
+
+    function renderCategoriesTable() {
+      const tbody = document.querySelector('#table-categories tbody');
+      const data = getPageData('categories');
+      const state = tableState.categories;
+
+      let html = '';
+      data.forEach(item => {
+        html += `
+          <tr>
+            <td class="font-medium">${item.category}</td>
+            <td>${formatNumber(item.pre)}</td>
+            <td>${formatNumber(item.post)}</td>
+            <td>${formatNumber(item.export)}</td>
+            <td class="font-semibold">${formatNumber(item.total)}</td>
+            <td><span class="status-badge ${getStatusClass(item.recycledPct)}">${formatPercent(item.recycledPct)}</span></td>
+            <td>${formatNumber(item.recycledQty)}</td>
+            <td><button class="action-btn" onclick="showCategoryModal('${item.category}')" title="View Details">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+            </button></td>
+          </tr>
+        `;
+      });
+
+      // Total row
+      const totals = state.data.reduce((acc, item) => ({
+        pre: acc.pre + item.pre,
+        post: acc.post + item.post,
+        export: acc.export + item.export,
+        total: acc.total + item.total,
+        recycledQty: acc.recycledQty + item.recycledQty
+      }), { pre: 0, post: 0, export: 0, total: 0, recycledQty: 0 });
+
+      const avgRecycled = state.data.reduce((sum, item) => sum + item.recycledPct, 0) / state.data.length;
+
+      html += `
+        <tr class="total-row">
+          <td class="font-bold">TOTAL</td>
+          <td class="font-bold">${formatNumber(totals.pre)}</td>
+          <td class="font-bold">${formatNumber(totals.post)}</td>
+          <td class="font-bold">${formatNumber(totals.export)}</td>
+          <td class="font-bold">${formatNumber(totals.total)}</td>
+          <td><span class="status-badge ${getStatusClass(avgRecycled)}">${formatPercent(avgRecycled)}</span></td>
+          <td class="font-bold">${formatNumber(totals.recycledQty)}</td>
+          <td></td>
+        </tr>
+      `;
+
+      tbody.innerHTML = html;
+      renderPagination('categories', state.sorted.length);
+    }
+
+    function renderRegisteredTable() {
+      const tbody = document.querySelector('#table-registered tbody');
+      const data = getPageData('registered');
+      const state = tableState.registered;
+
+      let html = '';
+      data.forEach(item => {
+        html += `
+          <tr>
+            <td><span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">${item.category}</span></td>
+            <td class="font-medium">${item.customer}</td>
+            <td>${formatNumber(item.totalQty)}</td>
+            <td><button class="action-btn" onclick="showRegisteredModal('${item.customer}', '${item.category}')" title="View Suppliers">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </button></td>
+          </tr>
+        `;
+      });
+
+      // Total row
+      const totalQty = state.data.reduce((sum, item) => sum + item.totalQty, 0);
+      html += `
+        <tr class="total-row">
+          <td class="font-bold" colspan="2">TOTAL</td>
+          <td class="font-bold">${formatNumber(totalQty)}</td>
+          <td></td>
+        </tr>
+      `;
+
+      tbody.innerHTML = html;
+      renderPagination('registered', state.sorted.length);
+    }
+
+    function renderUnregisteredTable() {
+      const tbody = document.querySelector('#table-unregistered tbody');
+      const data = getPageData('unregistered');
+      const state = tableState.unregistered;
+
+      let html = '';
+      data.forEach(item => {
+        html += `
+          <tr>
+            <td><span class="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium">${item.category}</span></td>
+            <td class="font-medium">${item.customer}</td>
+            <td>${formatNumber(item.totalQty)}</td>
+            <td><button class="action-btn" onclick="showUnregisteredModal('${item.customer}', '${item.category}')" title="View Suppliers">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+            </button></td>
+          </tr>
+        `;
+      });
+
+      // Total row
+      const totalQty = state.data.reduce((sum, item) => sum + item.totalQty, 0);
+      html += `
+        <tr class="total-row">
+          <td class="font-bold" colspan="2">TOTAL</td>
+          <td class="font-bold">${formatNumber(totalQty)}</td>
+          <td></td>
+        </tr>
+      `;
+
+      tbody.innerHTML = html;
+      renderPagination('unregistered', state.sorted.length);
+    }
+
+    function renderComparisonTable() {
+      const tbody = document.querySelector('#table-comparison tbody');
+      const data = getPageData('comparison');
+      const state = tableState.comparison;
+
+      // Update column headers with dynamic fiscal years
+      document.getElementById('col-current-fy').innerHTML = `${fiscalYear.current} <span class="sort-indicator">↕</span>`;
+      document.getElementById('col-previous-fy').innerHTML = `${fiscalYear.previous} <span class="sort-indicator">↕</span>`;
+
+      let html = '';
+      data.forEach(item => {
+        const changeIcon = item.changePct > 0 ? '↑' : item.changePct < 0 ? '↓' : '→';
+        html += `
+          <tr>
+            <td class="font-medium">${item.category}</td>
+            <td>${formatNumber(item.currentFY)}</td>
+            <td>${formatNumber(item.previousFY)}</td>
+            <td class="${getChangeClass(item.changePct)} font-semibold">
+              ${changeIcon} ${item.changePct >= 0 ? '+' : ''}${formatPercent(item.changePct)}
+            </td>
+          </tr>
+        `;
+      });
+
+      // Total row
+      const totals = state.data.reduce((acc, item) => ({
+        currentFY: acc.currentFY + item.currentFY,
+        previousFY: acc.previousFY + item.previousFY
+      }), { currentFY: 0, previousFY: 0 });
+
+      const totalChange = calculateChange(totals.currentFY, totals.previousFY);
+      const totalIcon = totalChange > 0 ? '↑' : totalChange < 0 ? '↓' : '→';
+
+      html += `
+        <tr class="total-row">
+          <td class="font-bold">TOTAL</td>
+          <td class="font-bold">${formatNumber(totals.currentFY)}</td>
+          <td class="font-bold">${formatNumber(totals.previousFY)}</td>
+          <td class="${getChangeClass(totalChange)} font-bold">
+            ${totalIcon} ${totalChange >= 0 ? '+' : ''}${formatPercent(totalChange)}
+          </td>
+        </tr>
+      `;
+
+      tbody.innerHTML = html;
+      renderPagination('comparison', state.sorted.length);
+    }
+
+    function renderStatewiseTable() {
+      const tbody = document.querySelector('#table-statewise tbody');
+      const data = getPageData('statewise');
+      const state = tableState.statewise;
+
+      let html = '';
+      data.forEach(item => {
+        html += `
+          <tr>
+            <td class="font-medium">${item.state}</td>
+            <td>${formatNumber(item.cat1)}</td>
+            <td>${formatNumber(item.cat2)}</td>
+            <td>${formatNumber(item.cat3)}</td>
+            <td>${formatNumber(item.cat4)}</td>
+            <td class="font-semibold">${formatNumber(item.total)}</td>
+            <td>${formatNumber(item.recycledQty)}</td>
+            <td><button class="action-btn" onclick="showStatewiseModal('${item.state}')" title="View State Details">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+              </svg>
+            </button></td>
+          </tr>
+        `;
+      });
+
+      // Total row
+      const totals = state.data.reduce((acc, item) => ({
+        cat1: acc.cat1 + item.cat1,
+        cat2: acc.cat2 + item.cat2,
+        cat3: acc.cat3 + item.cat3,
+        cat4: acc.cat4 + item.cat4,
+        total: acc.total + item.total,
+        recycledQty: acc.recycledQty + item.recycledQty
+      }), { cat1: 0, cat2: 0, cat3: 0, cat4: 0, total: 0, recycledQty: 0 });
+
+      html += `
+        <tr class="total-row">
+          <td class="font-bold">TOTAL</td>
+          <td class="font-bold">${formatNumber(totals.cat1)}</td>
+          <td class="font-bold">${formatNumber(totals.cat2)}</td>
+          <td class="font-bold">${formatNumber(totals.cat3)}</td>
+          <td class="font-bold">${formatNumber(totals.cat4)}</td>
+          <td class="font-bold">${formatNumber(totals.total)}</td>
+          <td class="font-bold">${formatNumber(totals.recycledQty)}</td>
+          <td></td>
+        </tr>
+      `;
+
+      tbody.innerHTML = html;
+      renderPagination('statewise', state.sorted.length);
+    }
+
+    // ============================================================
+    // MODAL FUNCTIONS
+    // ============================================================
+    function openModal(title, content) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-body').innerHTML = content;
+      document.getElementById('modal-overlay').classList.add('active');
+      document.getElementById('modal-content').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('active');
+      document.getElementById('modal-content').classList.remove('active');
+    }
+
+    function showCategoryModal(category) {
+      const clients = mockData.category_clients[category] || [];
+
+      let html = `
+        <div class="overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Client Name</th>
+                <th>Category</th>
+                <th>Total Qty (Tons)</th>
+                <th>Recycled %</th>
+                <th>Recycled Qty (Tons)</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      let totalQty = 0;
+      let totalRecycledQty = 0;
+
+      clients.forEach(client => {
+        const recycledQty = (client.totalQty * client.recycledPct) / 100;
+        totalQty += client.totalQty;
+        totalRecycledQty += recycledQty;
+
+        html += `
+          <tr>
+            <td class="font-medium">${client.clientName}</td>
+            <td><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">${category}</span></td>
+            <td>${formatNumber(client.totalQty)}</td>
+            <td><span class="status-badge ${getStatusClass(client.recycledPct)}">${formatPercent(client.recycledPct)}</span></td>
+            <td>${formatNumber(recycledQty)}</td>
+          </tr>
+        `;
+      });
+
+      const avgRecycled = totalQty > 0 ? (totalRecycledQty / totalQty) * 100 : 0;
+
+      html += `
+            <tr class="total-row">
+              <td class="font-bold" colspan="2">TOTAL</td>
+              <td class="font-bold">${formatNumber(totalQty)}</td>
+              <td><span class="status-badge ${getStatusClass(avgRecycled)}">${formatPercent(avgRecycled)}</span></td>
+              <td class="font-bold">${formatNumber(totalRecycledQty)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      `;
+
+      openModal(`${category} - Client Details`, html);
+    }
+
+    function showRegisteredModal(customer, category) {
+      const suppliers = mockData.registered_suppliers[customer] || [];
+
+      let html = `
+        <div class="overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Supplier Name</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Total Qty (Tons)</th>
+                <th>Last Supply Date</th>
+                <th>Rating</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      let totalQty = 0;
+
+      suppliers.forEach(supplier => {
+        totalQty += supplier.totalQty;
+
+        html += `
+          <tr>
+            <td class="font-medium">${supplier.supplierName}</td>
+            <td><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">${category}</span></td>
+            <td><span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">Registered</span></td>
+            <td>${formatNumber(supplier.totalQty)}</td>
+            <td>${supplier.lastSupplyDate}</td>
+            <td>${renderRating(supplier.rating)}</td>
+          </tr>
+        `;
+      });
+
+      html += `
+            <tr class="total-row">
+              <td class="font-bold" colspan="3">TOTAL</td>
+              <td class="font-bold">${formatNumber(totalQty)}</td>
+              <td colspan="2"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      `;
+
+      openModal(`${customer} - Supplier Details`, html);
+    }
+
+    function showUnregisteredModal(customer, category) {
+      const suppliers = mockData.unregistered_suppliers[customer] || [];
+
+      let html = `
+        <div class="overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Supplier Name</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Total Qty (Tons)</th>
+                <th>Last Supply Date</th>
+                <th>Rating</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      let totalQty = 0;
+
+      suppliers.forEach(supplier => {
+        totalQty += supplier.totalQty;
+
+        html += `
+          <tr>
+            <td class="font-medium">${supplier.supplierName}</td>
+            <td><span class="px-2 py-1 bg-amber-100 text-amber-800 rounded text-xs">${category}</span></td>
+            <td><span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium">Unregistered</span></td>
+            <td>${formatNumber(supplier.totalQty)}</td>
+            <td>${supplier.lastSupplyDate}</td>
+            <td>${renderRating(supplier.rating)}</td>
+          </tr>
+        `;
+      });
+
+      html += `
+            <tr class="total-row">
+              <td class="font-bold" colspan="3">TOTAL</td>
+              <td class="font-bold">${formatNumber(totalQty)}</td>
+              <td colspan="2"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      `;
+
+      openModal(`${customer} - Supplier Details`, html);
+    }
+
+    function showStatewiseModal(state) {
+      const details = mockData.state_details[state];
+      if (!details) return;
+
+      const categories = ['Cat I', 'Cat II', 'Cat III', 'Cat IV'];
+      const sections = { pre: 'Pre', post: 'Post', export: 'Export' };
+
+      let html = `<h4 class="text-lg font-bold text-slate-900 mb-4">${state} - Category Wise Distribution</h4>`;
+      html += `<div class="overflow-x-auto rounded-lg border border-slate-200">`;
+      html += `<table class="data-table w-full" style="font-size: 0.75rem;">`;
+
+      // Header rows
+      html += `<thead>`;
+      html += `<tr>`;
+      html += `<th rowspan="2" class="align-middle">State (Category Wise)</th>`;
+      html += `<th colspan="3" class="text-center border-r border-slate-300">Total</th>`;
+      html += `<th colspan="3" class="text-center border-r border-slate-300">Pre</th>`;
+      html += `<th colspan="3" class="text-center border-r border-slate-300">Post</th>`;
+      html += `<th colspan="3" class="text-center">Export</th>`;
+      html += `</tr>`;
+
+      html += `<tr>`;
+      // Total sub-headers
+      html += `<th>Total Qty</th>`;
+      html += `<th>Recycled %</th>`;
+      html += `<th class="border-r border-slate-300">Recycled Qty</th>`;
+      // Pre sub-headers
+      html += `<th>Recycled %</th>`;
+      html += `<th>Recycled Qty</th>`;
+      html += `<th class="border-r border-slate-300">Total</th>`;
+      // Post sub-headers
+      html += `<th>Recycled %</th>`;
+      html += `<th>Recycled Qty</th>`;
+      html += `<th class="border-r border-slate-300">Total</th>`;
+      // Export sub-headers
+      html += `<th>Recycled %</th>`;
+      html += `<th>Recycled Qty</th>`;
+      html += `<th>Total</th>`;
+      html += `</tr>`;
+      html += `</thead>`;
+
+      html += `<tbody>`;
+
+      let grandTotalQty = 0;
+      let grandRecycledQty = 0;
+      let grandPreTotal = 0, grandPostTotal = 0, grandExportTotal = 0;
+      let grandPreRecycled = 0, grandPostRecycled = 0, grandExportRecycled = 0;
+
+      // Data rows
+      categories.forEach(category => {
+        let categoryTotalQty = 0;
+        let categoryRecycledQty = 0;
+        let catPreTotal = 0, catPostTotal = 0, catExportTotal = 0;
+        let catPreRecycled = 0, catPostRecycled = 0, catExportRecycled = 0;
+
+        // Calculate totals for this category across all sections
+        Object.keys(sections).forEach(section => {
+          const sectionData = details[section] || [];
+          const item = sectionData.find(i => i.category === category);
+          if (item) {
+            const recycledQty = (item.totalQty * item.recycledPct) / 100;
+
+            if (section === 'pre') {
+              catPreTotal = item.totalQty;
+              catPreRecycled = recycledQty;
+            } else if (section === 'post') {
+              catPostTotal = item.totalQty;
+              catPostRecycled = recycledQty;
+            } else if (section === 'export') {
+              catExportTotal = item.totalQty;
+              catExportRecycled = recycledQty;
+            }
+          }
+        });
+
+        categoryTotalQty = catPreTotal + catPostTotal + catExportTotal;
+        categoryRecycledQty = catPreRecycled + catPostRecycled + catExportRecycled;
+        const categoryRecycledPct = categoryTotalQty > 0 ? (categoryRecycledQty / categoryTotalQty) * 100 : 0;
+
+        grandTotalQty += categoryTotalQty;
+        grandRecycledQty += categoryRecycledQty;
+        grandPreTotal += catPreTotal;
+        grandPostTotal += catPostTotal;
+        grandExportTotal += catExportTotal;
+        grandPreRecycled += catPreRecycled;
+        grandPostRecycled += catPostRecycled;
+        grandExportRecycled += catExportRecycled;
+
+        const preRecycledPct = catPreTotal > 0 ? (catPreRecycled / catPreTotal) * 100 : 0;
+        const postRecycledPct = catPostTotal > 0 ? (catPostRecycled / catPostTotal) * 100 : 0;
+        const exportRecycledPct = catExportTotal > 0 ? (catExportRecycled / catExportTotal) * 100 : 0;
+
+        html += `<tr>`;
+        html += `<td class="font-medium">${category}</td>`;
+        // Total columns
+        html += `<td>${formatNumber(categoryTotalQty)}</td>`;
+        html += `<td><span class="status-badge ${getStatusClass(categoryRecycledPct)}">${formatPercent(categoryRecycledPct)}</span></td>`;
+        html += `<td class="border-r border-slate-300">${formatNumber(categoryRecycledQty)}</td>`;
+        // Pre columns
+        html += `<td><span class="status-badge ${getStatusClass(preRecycledPct)}">${formatPercent(preRecycledPct)}</span></td>`;
+        html += `<td>${formatNumber(catPreRecycled)}</td>`;
+        html += `<td class="border-r border-slate-300">${formatNumber(catPreTotal)}</td>`;
+        // Post columns
+        html += `<td><span class="status-badge ${getStatusClass(postRecycledPct)}">${formatPercent(postRecycledPct)}</span></td>`;
+        html += `<td>${formatNumber(catPostRecycled)}</td>`;
+        html += `<td class="border-r border-slate-300">${formatNumber(catPostTotal)}</td>`;
+        // Export columns
+        html += `<td><span class="status-badge ${getStatusClass(exportRecycledPct)}">${formatPercent(exportRecycledPct)}</span></td>`;
+        html += `<td>${formatNumber(catExportRecycled)}</td>`;
+        html += `<td>${formatNumber(catExportTotal)}</td>`;
+        html += `</tr>`;
+      });
+
+      // Total row
+      const grandRecycledPct = grandTotalQty > 0 ? (grandRecycledQty / grandTotalQty) * 100 : 0;
+      const grandPreRecycledPct = grandPreTotal > 0 ? (grandPreRecycled / grandPreTotal) * 100 : 0;
+      const grandPostRecycledPct = grandPostTotal > 0 ? (grandPostRecycled / grandPostTotal) * 100 : 0;
+      const grandExportRecycledPct = grandExportTotal > 0 ? (grandExportRecycled / grandExportTotal) * 100 : 0;
+
+      html += `<tr class="total-row">`;
+      html += `<td class="font-bold">TOTAL</td>`;
+      // Total columns
+      html += `<td class="font-bold">${formatNumber(grandTotalQty)}</td>`;
+      html += `<td><span class="status-badge ${getStatusClass(grandRecycledPct)}">${formatPercent(grandRecycledPct)}</span></td>`;
+      html += `<td class="font-bold border-r border-slate-300">${formatNumber(grandRecycledQty)}</td>`;
+      // Pre columns
+      html += `<td><span class="status-badge ${getStatusClass(grandPreRecycledPct)}">${formatPercent(grandPreRecycledPct)}</span></td>`;
+      html += `<td class="font-bold">${formatNumber(grandPreRecycled)}</td>`;
+      html += `<td class="font-bold border-r border-slate-300">${formatNumber(grandPreTotal)}</td>`;
+      // Post columns
+      html += `<td><span class="status-badge ${getStatusClass(grandPostRecycledPct)}">${formatPercent(grandPostRecycledPct)}</span></td>`;
+      html += `<td class="font-bold">${formatNumber(grandPostRecycled)}</td>`;
+      html += `<td class="font-bold border-r border-slate-300">${formatNumber(grandPostTotal)}</td>`;
+      // Export columns
+      html += `<td><span class="status-badge ${getStatusClass(grandExportRecycledPct)}">${formatPercent(grandExportRecycledPct)}</span></td>`;
+      html += `<td class="font-bold">${formatNumber(grandExportRecycled)}</td>`;
+      html += `<td class="font-bold">${formatNumber(grandExportTotal)}</td>`;
+      html += `</tr>`;
+
+      html += `</tbody>`;
+      html += `</table>`;
+      html += `</div>`;
+
+      openModal(`${state} - Detailed Distribution`, html);
+    }
+
+    // ============================================================
+    // CSV DOWNLOAD
+    // ============================================================
+    function downloadCSV(tableId) {
+      let csvContent = '';
+      let filename = '';
+
+      switch (tableId) {
+        case 'categories':
+          csvContent = 'Category,Pre,Post,Export,Total,% Recycled,Recycled Qty (Tons)\n';
+          tableState.categories.data.forEach(item => {
+            csvContent += `${item.category},${item.pre},${item.post},${item.export},${item.total},${item.recycledPct},${item.recycledQty}\n`;
+          });
+          filename = 'categories_overview.csv';
+          break;
+
+        case 'registered':
+          csvContent = 'Category,Customer,Total Qty (Tons)\n';
+          tableState.registered.data.forEach(item => {
+            csvContent += `${item.category},${item.customer},${item.totalQty}\n`;
+          });
+          filename = 'registered_customers.csv';
+          break;
+
+        case 'unregistered':
+          csvContent = 'Category,Customer,Total Qty (Tons)\n';
+          tableState.unregistered.data.forEach(item => {
+            csvContent += `${item.category},${item.customer},${item.totalQty}\n`;
+          });
+          filename = 'unregistered_customers.csv';
+          break;
+
+        case 'comparison':
+          csvContent = `Category,${fiscalYear.current},${fiscalYear.previous},Change (%)\n`;
+          tableState.comparison.data.forEach(item => {
+            csvContent += `${item.category},${item.currentFY},${item.previousFY},${item.changePct.toFixed(1)}\n`;
+          });
+          filename = 'year_comparison.csv';
+          break;
+
+        case 'statewise':
+          csvContent = 'State/UT,Cat I,Cat II,Cat III,Cat IV,Total,Recycled Qty\n';
+          tableState.statewise.data.forEach(item => {
+            csvContent += `${item.state},${item.cat1},${item.cat2},${item.cat3},${item.cat4},${item.total},${item.recycledQty}\n`;
+          });
+          filename = 'state_distribution.csv';
+          break;
+      }
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    // ============================================================
+    // TAB NAVIGATION
+    // ============================================================
+    function initTabs() {
+      const tabBtns = document.querySelectorAll('.tab-btn');
+
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabId = btn.dataset.tab;
+
+          // Update button states
+          tabBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          // Update tab content visibility
+          document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.add('hidden');
+          });
+          document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+        });
+      });
+    }
+
+    // ============================================================
+    // SEARCH EVENT LISTENERS
+    // ============================================================
+    function initSearch() {
+      const searchInputs = [
+        { id: 'search-categories', table: 'categories' },
+        { id: 'search-registered', table: 'registered' },
+        { id: 'search-unregistered', table: 'unregistered' },
+        { id: 'search-comparison', table: 'comparison' },
+        { id: 'search-statewise', table: 'statewise' }
+      ];
+
+      searchInputs.forEach(({ id, table }) => {
+        const input = document.getElementById(id);
+        if (input) {
+          input.addEventListener('input', (e) => {
+            filterData(table, e.target.value);
+          });
+        }
+      });
+    }
+
+    // ============================================================
+    // SORT EVENT LISTENERS
+    // ============================================================
+    function initSort() {
+      const tables = ['categories', 'registered', 'unregistered', 'comparison', 'statewise'];
+
+      tables.forEach(tableId => {
+        const table = document.getElementById(`table-${tableId}`);
+        if (table) {
+          table.querySelectorAll('th[data-sort]').forEach(th => {
+            th.addEventListener('click', () => {
+              sortData(tableId, th.dataset.sort);
+            });
+          });
+        }
+      });
+    }
+
+    // ============================================================
+    // ELEMENTS SDK INTEGRATION
+    // ============================================================
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig: defaultConfig,
+        onConfigChange: async (config) => {
+          const titleEl = document.getElementById('dashboard-title');
+          const companyEl = document.getElementById('company-name');
+
+          if (titleEl) titleEl.textContent = config.dashboard_title || defaultConfig.dashboard_title;
+          if (companyEl) companyEl.textContent = config.company_name || defaultConfig.company_name;
+
+          // Apply font family
+          const fontFamily = config.font_family || defaultConfig.font_family;
+          document.body.style.fontFamily = `${fontFamily}, system-ui, sans-serif`;
+        },
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                config.primary_color = value;
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => {
+                config.secondary_color = value;
+                window.elementSdk.setConfig({ secondary_color: value });
+              }
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => {
+                config.accent_color = value;
+                window.elementSdk.setConfig({ accent_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['dashboard_title', config.dashboard_title || defaultConfig.dashboard_title],
+          ['company_name', config.company_name || defaultConfig.company_name]
+        ])
+      });
+    }
+
+    // ============================================================
+    // INITIALIZATION
+    // ============================================================
+    function init() {
+      // Update fiscal year display
+      document.getElementById('fiscal-year-display').textContent = fiscalYear.current;
+
+      // Setup fiscal year dropdown
+      const fyBtn = document.getElementById('fiscal-year-btn');
+      const fyDropdown = document.getElementById('fiscal-year-dropdown');
+
+      fyBtn.addEventListener('click', () => {
+        fyDropdown.classList.toggle('hidden');
+      });
+
+      document.querySelectorAll('.fy-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const fy = btn.dataset.fy;
+          document.getElementById('fiscal-year-display').textContent = fy;
+          fyDropdown.classList.add('hidden');
+          document.querySelectorAll('.fy-option').forEach(b => {
+            b.classList.remove('text-gray-900', 'font-semibold');
+            b.classList.add('text-gray-600');
+          });
+          btn.classList.remove('text-gray-600');
+          btn.classList.add('text-gray-900', 'font-semibold');
+        });
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!fyBtn.contains(e.target) && !fyDropdown.contains(e.target)) {
+          fyDropdown.classList.add('hidden');
+        }
+      });
+
+      const mainMenu = document.getElementById('main-menu');
+      const menuToggle = document.querySelector('[data-toggle="main-menu"]');
+      if (menuToggle && mainMenu) {
+        menuToggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const isVisible = mainMenu.classList.contains('show');
+          mainMenu.classList.toggle('show');
+          const arrow = menuToggle.querySelector('svg:last-child');
+          if (arrow) {
+            arrow.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)';
+          }
+        });
+        document.addEventListener('click', (e) => {
+          if (!mainMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+            mainMenu.classList.remove('show');
+            const arrow = menuToggle.querySelector('svg:last-child');
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+          }
+        });
+      }
+
+      const categoryTabs = document.querySelectorAll('.epr-category-tab');
+      categoryTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          categoryTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+        });
+      });
+
+      processData();
+      initTabs();
+      initSearch();
+      initSort();
+
+      // Render all tables
+      renderCategoriesTable();
+      renderRegisteredTable();
+      renderUnregisteredTable();
+      renderComparisonTable();
+      renderStatewiseTable();
+    }
+
+    function showCardModal(title, type) {
+      let html = '';
+
+      switch (type) {
+        case 'categories':
+          html = `
+            <h4 class="text-lg font-bold text-slate-900 mb-4">Product Categories Summary</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          `;
+          mockData.categories_overview.forEach(item => {
+            const total = item.pre + item.post + item.export;
+            const recycledQty = (total * item.recycledPct) / 100;
+            html += `
+              <div class="border border-slate-200 rounded-lg p-4 bg-gradient-to-br from-slate-50 to-white">
+                <h5 class="font-bold text-slate-900 text-lg">${item.category}</h5>
+                <div class="mt-3 space-y-2 text-sm">
+                  <div class="flex justify-between"><span class="text-slate-600">Pre</span><span class="font-semibold">${formatNumber(item.pre)}</span></div>
+                  <div class="flex justify-between"><span class="text-slate-600">Post</span><span class="font-semibold">${formatNumber(item.post)}</span></div>
+                  <div class="flex justify-between"><span class="text-slate-600">Export</span><span class="font-semibold">${formatNumber(item.export)}</span></div>
+                  <div class="border-t border-slate-200 pt-2 flex justify-between"><span class="text-slate-600 font-medium">Total</span><span class="font-bold">${formatNumber(total)}</span></div>
+                  <div class="flex justify-between mt-2"><span class="text-slate-600">Recycled %</span><span class="status-badge ${getStatusClass(item.recycledPct)}">${formatPercent(item.recycledPct)}</span></div>
+                  <div class="flex justify-between"><span class="text-slate-600">Recycled Qty</span><span class="font-semibold">${formatNumber(recycledQty)}</span></div>
+                </div>
+              </div>
+            `;
+          });
+          html += '</div>';
+          break;
+
+        case 'quantity':
+          const totalQty = tableState.categories.data.reduce((sum, item) => sum + item.total, 0);
+          const categoryBreakdown = tableState.categories.data.map(item => ({
+            category: item.category,
+            qty: item.total,
+            pct: (item.total / totalQty) * 100
+          }));
+
+          html = `
+            <h4 class="text-lg font-bold text-slate-900 mb-4">Total Quantity Breakdown</h4>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-200">
+                <span class="font-bold text-slate-900">Category</span>
+                <span class="font-bold text-slate-900">Amount (Tons)</span>
+              </div>
+          `;
+          categoryBreakdown.forEach(item => {
+            html += `
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="font-medium text-slate-700">${item.category}</span>
+                  <span class="font-semibold text-slate-900">${formatNumber(item.qty)}</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                  <div class="bg-blue-500 h-full rounded-full" style="width: ${item.pct}%"></div>
+                </div>
+                <div class="text-xs text-slate-500 mt-1">${formatPercent(item.pct)}</div>
+              </div>
+            `;
+          });
+          html += `
+              <div class="border-t border-slate-200 pt-4 mt-4 flex justify-between font-bold text-slate-900">
+                <span>Total:</span>
+                <span>${formatNumber(totalQty)} Tons</span>
+              </div>
+            </div>
+          `;
+          break;
+
+        case 'recycled':
+          html = `
+            <h4 class="text-lg font-bold text-slate-900 mb-4">Recycling Performance by Category</h4>
+            <div class="space-y-4">
+          `;
+          tableState.categories.data.forEach(item => {
+            html += `
+              <div class="border border-slate-200 rounded-lg p-4 bg-gradient-to-br from-slate-50 to-white">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="font-bold text-slate-900">${item.category}</span>
+                  <span class="status-badge ${getStatusClass(item.recycledPct)}">${formatPercent(item.recycledPct)}</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden mb-2">
+                  <div class="bg-green-500 h-full rounded-full" style="width: ${item.recycledPct}%"></div>
+                </div>
+                <div class="flex justify-between text-sm text-slate-600">
+                  <span>Recycled: ${formatNumber(item.recycledQty)} Tons</span>
+                  <span>Total: ${formatNumber(item.total)} Tons</span>
+                </div>
+              </div>
+            `;
+          });
+          html += '</div>';
+          break;
+
+        case 'yoy':
+          html = `
+            <h4 class="text-lg font-bold text-slate-900 mb-4">Year-over-Year Comparison</h4>
+            <div class="overflow-x-auto">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>${fiscalYear.current}</th>
+                    <th>${fiscalYear.previous}</th>
+                    <th>Change</th>
+                  </tr>
+                </thead>
+                <tbody>
+          `;
+          tableState.comparison.data.forEach(item => {
+            const icon = item.changePct > 0 ? '↑' : item.changePct < 0 ? '↓' : '→';
+            html += `
+              <tr>
+                <td class="font-medium">${item.category}</td>
+                <td>${formatNumber(item.currentFY)}</td>
+                <td>${formatNumber(item.previousFY)}</td>
+                <td class="${getChangeClass(item.changePct)} font-semibold">${icon} ${item.changePct >= 0 ? '+' : ''}${formatPercent(item.changePct)}</td>
+              </tr>
+            `;
+          });
+
+          const totals = tableState.comparison.data.reduce((acc, item) => ({
+            currentFY: acc.currentFY + item.currentFY,
+            previousFY: acc.previousFY + item.previousFY
+          }), { currentFY: 0, previousFY: 0 });
+
+          const totalChange = calculateChange(totals.currentFY, totals.previousFY);
+          const totalIcon = totalChange > 0 ? '↑' : totalChange < 0 ? '↓' : '→';
+
+          html += `
+                  <tr class="total-row">
+                    <td class="font-bold">TOTAL</td>
+                    <td class="font-bold">${formatNumber(totals.currentFY)}</td>
+                    <td class="font-bold">${formatNumber(totals.previousFY)}</td>
+                    <td class="${getChangeClass(totalChange)} font-bold">${totalIcon} ${totalChange >= 0 ? '+' : ''}${formatPercent(totalChange)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          `;
+          break;
+      }
+
+      openModal(title, html);
+    }
+
+    // Start the application
+    init();
+  </script>
+  <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9d30c3d004ce46ec',t:'MTc3MTk1NTAwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+
+</html>

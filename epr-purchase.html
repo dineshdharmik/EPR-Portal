@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESG EPR Dashboard</title>
+    <script src="/_sdk/element_sdk.js"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0d9488;
+            --primary-light: #14b8a6;
+            --primary-dark: #0f766e;
+            --secondary: #6366f1;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --surface: #ffffff;
+            --surface-alt: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --gradient-start: #0d9488;
+            --gradient-end: #6366f1;
+        }
+
+        * {
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .app-wrapper {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(135deg, #f0fdfa 0%, #ede9fe 100%);
+            overflow: visible;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--surface-alt) 0%, var(--surface) 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header:hover {
+            background: linear-gradient(135deg, #f1f5f9 0%, var(--surface-alt) 100%);
+        }
+
+        .card-body {
+            padding: 20px;
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        .card-body.collapsed {
+            max-height: 0;
+            padding: 0 20px;
+            opacity: 0;
+        }
+
+        .chevron-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .chevron-icon.rotated {
+            transform: rotate(-180deg);
+        }
+
+        .table-modern {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table-modern thead th {
+            background: linear-gradient(135deg, var(--surface-alt) 0%, #f1f5f9 100%);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s ease;
+            position: relative;
+        }
+
+        .table-modern thead th:hover {
+            background: #e2e8f0;
+        }
+
+        .table-modern thead th .sort-icon {
+            margin-left: 6px;
+            opacity: 0.4;
+            font-size: 11px;
+        }
+
+        .table-modern thead th.sorted .sort-icon {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .table-modern tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .table-modern tbody tr:nth-child(even) {
+            background: var(--surface-alt);
+        }
+
+        .table-modern tbody tr:hover {
+            background: linear-gradient(135deg, #f0fdfa 0%, #ede9fe 100%);
+            transform: scale(1.005);
+        }
+
+        .table-modern tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .table-modern tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-modern tfoot td {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 14px 16px;
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            gap: 4px;
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+        }
+
+        .badge-danger {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+        }
+
+        .badge-info {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+        }
+
+        .badge-warning {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+            color: white;
+        }
+
+        .btn-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, var(--secondary) 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 20px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 85%;
+            overflow: hidden;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .star-rating {
+            display: inline-flex;
+            gap: 2px;
+        }
+
+        .star-rating .fa-star {
+            color: #fbbf24;
+        }
+
+        .star-rating .fa-star.empty {
+            color: #e2e8f0;
+        }
+
+        .deviation-positive {
+            color: var(--success);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .deviation-negative {
+            color: var(--danger);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .filter-dropdown {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            font-size: 14px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 180px;
+        }
+
+        .filter-dropdown:hover {
+            border-color: var(--primary);
+        }
+
+        .filter-dropdown:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+
+        .warning-accent {
+            border-left: 4px solid var(--danger);
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+
+        .section-icon.green {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+        }
+
+        .section-icon.blue {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+        }
+
+        .section-icon.purple {
+            background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+            color: #5b21b6;
+        }
+
+        .section-icon.orange {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+        }
+
+        .section-icon.red {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+        }
+
+        @media (max-width: 768px) {
+            .table-modern {
+                font-size: 12px;
+            }
+
+            .table-modern thead th,
+            .table-modern tbody td {
+                padding: 10px 8px;
+            }
+
+            .card-body {
+                padding: 12px;
+            }
+
+            .modal-content {
+                max-height: 90%;
+                margin: 10px;
+            }
+
+            .filter-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .filter-dropdown {
+                width: 100%;
+            }
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .header-top {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 24px;
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .company-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .company-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .company-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .gap-3 {
+            gap: 12px;
+        }
+
+        .p-6 {
+            padding: 24px;
+        }
+
+        .space-y-6>*+* {
+            margin-top: 24px;
+        }
+    </style>
+</head>
+
+<body class="h-full">
+    <div class="app-wrapper">
+
+        <header class="bg-white shadow-md z-50 sticky top-0">
+
+            <!-- Top Header -->
+            <div class="px-6 py-4 flex items-center justify-between border-b border-gray-200">
+
+                <div class="flex items-center space-x-6">
+
+                    <!-- Logo -->
+                    <div class="flex items-center space-x-4">
+                        <div
+                            class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-600 rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-database text-white"></i>
+                        </div>
+
+                        <div>
+                            <h1 class="text-gray-800 font-bold text-xl">EPR Portal</h1>
+                            <p class="text-gray-500 text-xs">Extended Producer Responsibility</p>
+                        </div>
+                    </div>
+
+                    <!-- Category Tabs -->
+                    <div class="flex items-center space-x-2 bg-gray-100 rounded-lg p-1 ml-6">
+
+                        <button class="px-6 py-2 rounded-md font-semibold text-sm bg-white shadow text-green-600">
+                            PWMR
+                        </button>
+
+                        <button class="px-6 py-2 rounded-md font-semibold text-sm text-gray-500 hover:bg-white">
+                            BWMR
+                        </button>
+
+                        <button class="px-6 py-2 rounded-md font-semibold text-sm text-gray-500 hover:bg-white">
+                            EWMR
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- Right Actions -->
+                <div class="flex items-center space-x-4">
+
+                    <button class="p-2 hover:bg-gray-100 rounded-lg">
+                        <i class="fa-regular fa-bell text-gray-600"></i>
+                    </button>
+
+                    <div
+                        class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center">
+                        <span class="text-white font-semibold text-sm">AD</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Dark Navigation -->
+            <nav class="px-6 bg-gradient-to-r from-slate-800 to-slate-700">
+
+                <div class="flex items-center space-x-1">
+
+                    <!-- Home -->
+                    <a href="index.html"
+                        class="px-6 py-4 text-white flex items-center space-x-2 bg-teal-700 border-b-2 border-green-400">
+
+                        <i class="fa-solid fa-house"></i>
+                        <span class="text-sm font-medium">Home Dashboard</span>
+
+                    </a>
+
+                    <!-- Leadership -->
+                    <div
+                        class="px-6 py-4 text-white flex items-center space-x-2 hover:bg-white hover:bg-opacity-10 cursor-pointer">
+
+                        <i class="fa-solid fa-chart-column"></i>
+                        <span class="text-sm font-medium">Leadership All EPR Dashboard</span>
+
+                    </div>
+
+                    <!-- Calendar -->
+                    <div
+                        class="px-6 py-4 text-white flex items-center space-x-2 hover:bg-white hover:bg-opacity-10 cursor-pointer">
+
+                        <i class="fa-regular fa-calendar"></i>
+                        <span class="text-sm font-medium">Compliance Calendar</span>
+
+                    </div>
+
+                    <!-- Menu Dropdown -->
+                    <div class="relative group">
+
+                        <div
+                            class="px-6 py-4 text-white flex items-center space-x-2 hover:bg-white hover:bg-opacity-10 cursor-pointer">
+
+                            <i class="fa-solid fa-bars"></i>
+                            <span class="text-sm font-medium">Menu</span>
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+
+                        </div>
+
+                        <div
+                            class="absolute hidden group-hover:block top-[85%] mt-2 left-0 bg-slate-800 shadow-xl rounded-lg min-w-[260px] z-[9999]">
+
+                            <a href="epr-consumption-dashboard.html"
+                                class="block px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10">
+                                EPR Compliance Dashboard
+                            </a>
+
+                            <a href="epr-purchase.html"
+                                class="block px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10">
+                                EPR Purchase
+                            </a>
+
+                            <a href="#"
+                                class="block px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10">
+                                EPR Consumption
+                            </a>
+
+                            <a href="#"
+                                class="block px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10">
+                                EPR Credits
+                            </a>
+
+                            <a href="#"
+                            class="block px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10">
+                            Account Wise View
+                        </a>
+
+                        <a href="#real-time"
+                        class="block w-full text-left nav-item px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 cursor-pointer rounded-b-lg"
+                        data-section="real-time">
+                        Real Time Data Status
+                      </a>
+
+                        </div>
+
+                    </div>
+
+                    <div class="h-6 w-px bg-gray-600 mx-2"></div>
+
+                    <!-- AI Insights -->
+                    <div
+                        class="px-6 py-4 text-white flex items-center space-x-2 hover:bg-white hover:bg-opacity-10 cursor-pointer">
+
+                        <i class="fa-solid fa-lightbulb"></i>
+                        <span class="text-sm font-medium">AI Insights</span>
+
+                    </div>
+
+                    <!-- AI Copilot -->
+                    <div
+                        class="px-6 py-4 text-white flex items-center space-x-2 hover:bg-white hover:bg-opacity-10 cursor-pointer">
+
+                        <i class="fa-regular fa-comments"></i>
+                        <span class="text-sm font-medium">AI Copilot</span>
+
+                    </div>
+
+                </div>
+
+            </nav>
+
+
+            <!-- Filters -->
+            <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
+
+                <div class="flex items-center space-x-6">
+
+                    <div class="flex items-center space-x-2">
+                        <label class="text-sm font-medium text-gray-700">Group:</label>
+                        <select class="px-4 py-2 border rounded-lg text-sm">
+                            <option>All Groups</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <label class="text-sm font-medium text-gray-700">Entity:</label>
+                        <select class="px-4 py-2 border rounded-lg text-sm">
+                            <option>All Legal Entities</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <label class="text-sm font-medium text-gray-700">User View:</label>
+                        <select class="px-4 py-2 border rounded-lg text-sm">
+                            <option>Aggregated View</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <label class="text-sm font-medium text-gray-700">Custom View:</label>
+                        <select class="px-4 py-2 border rounded-lg text-sm border-green-400">
+                            <option>All Views</option>
+                        </select>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- Filter Section -->
+        <div
+            style="background: white; padding: 16px 24px; border-bottom: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <span style="font-weight: 600; color: var(--text-primary);">Filters:</span>
+                <select class="filter-dropdown" id="categoryFilter">
+                    <option value="">All Categories</option>
+                    <option value="Cat 1">Cat 1</option>
+                    <option value="Cat 2">Cat 2</option>
+                    <option value="Cat 3">Cat 3</option>
+                    <option value="Cat 4">Cat 4</option>
+                    <option value="Cat 5">Cat 5</option>
+                </select>
+                <select class="filter-dropdown" id="statusFilter">
+                    <option value="">All Status</option>
+                    <option value="Registered">Registered</option>
+                    <option value="Unregistered">Unregistered</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content w-full">
+            <div class="p-6 space-y-6">
+
+                <!-- Section 1: Categories Summary -->
+                <section class="card" id="section1">
+                    <div class="card-header" onclick="toggleSection('section1')">
+                        <div class="flex items-center">
+                            <div class="section-icon green">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-semibold text-gray-800">Categories Overview</h2>
+                                <p class="text-sm text-gray-500">Summary of all material categories</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button class="btn-export"
+                                onclick="event.stopPropagation(); exportToCSV('categoriesData', 'categories_summary.csv')">
+                                <i class="fa-solid fa-download"></i>
+                                Export
+                            </button>
+                            <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table-modern" id="categoriesTable">
+                                <thead>
+                                    <tr>
+                                        <th onclick="sortTable('categoriesTable', 0)">Category <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th onclick="sortTable('categoriesTable', 1)">Registered <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th onclick="sortTable('categoriesTable', 2)">Unregistered <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th onclick="sortTable('categoriesTable', 3)">Total <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th onclick="sortTable('categoriesTable', 4)">Recycled <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="categoriesTableBody"></tbody>
+                                <tfoot id="categoriesTableFoot"></tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 2: Category I - Container Capacity Breakup -->
+                <section class="card" id="section2">
+                    <div class="card-header" onclick="toggleSection('section2')">
+                        <div class="flex items-center">
+                            <div class="section-icon blue">
+                                <i class="fa-solid fa-boxes-stacked"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-semibold text-gray-800">Category I – Container Capacity Breakup
+                                </h2>
+                                <p class="text-sm text-gray-500">Detailed breakdown by container size</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button class="btn-export"
+                                onclick="event.stopPropagation(); exportToCSV('containerData', 'container_capacity.csv')">
+                                <i class="fa-solid fa-download"></i>
+                                Export
+                            </button>
+                            <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table-modern" id="containerTable">
+                                <thead>
+                                    <tr>
+                                        <th onclick="sortTable('containerTable', 0)">Container Capacity <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th onclick="sortTable('containerTable', 1)">Quantity (Tons) <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="containerTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 3: Registered Supplier Details -->
+                <section class="card" id="section3">
+                    <div class="card-header" onclick="toggleSection('section3')">
+                        <div class="flex items-center">
+                            <div class="section-icon purple">
+                                <i class="fa-solid fa-building-circle-check"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-semibold text-gray-800">Registered Supplier Details</h2>
+                                <p class="text-sm text-gray-500">Verified and compliant suppliers</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button class="btn-export"
+                                onclick="event.stopPropagation(); exportToCSV('registeredSupplierData', 'registered_suppliers.csv')">
+                                <i class="fa-solid fa-download"></i>
+                                Export
+                            </button>
+                            <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table-modern" id="registeredSupplierTable">
+                                <thead>
+                                    <tr>
+                                        <th onclick="sortTable('registeredSupplierTable', 0)">Category <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th onclick="sortTable('registeredSupplierTable', 1)">Suppliers <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th onclick="sortTable('registeredSupplierTable', 2)">Total Qty (Tons) <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="registeredSupplierTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 4: Unregistered Supplier Details -->
+                <section class="card warning-accent" id="section4">
+                    <div class="card-header" onclick="toggleSection('section4')">
+                        <div class="flex items-center">
+                            <div class="section-icon red">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-semibold text-gray-800">
+                                    Unregistered Supplier Details
+                                    <span class="badge badge-warning ml-2">
+                                        <i class="fa-solid fa-exclamation-circle"></i>
+                                        Attention Required
+                                    </span>
+                                </h2>
+                                <p class="text-sm text-gray-500">Suppliers pending verification</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button class="btn-export"
+                                onclick="event.stopPropagation(); exportToCSV('unregisteredSupplierData', 'unregistered_suppliers.csv')">
+                                <i class="fa-solid fa-download"></i>
+                                Export
+                            </button>
+                            <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table-modern" id="unregisteredSupplierTable">
+                                <thead>
+                                    <tr>
+                                        <th onclick="sortTable('unregisteredSupplierTable', 0)">Category <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th onclick="sortTable('unregisteredSupplierTable', 1)">Suppliers <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th onclick="sortTable('unregisteredSupplierTable', 2)">Total Qty (Tons) <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="unregisteredSupplierTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 5: EPR Purchase Data Summary -->
+                <section class="card" id="section5">
+                    <div class="card-header" onclick="toggleSection('section5')">
+                        <div class="flex items-center">
+                            <div class="section-icon orange">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-semibold text-gray-800">EPR Purchase Data Summary</h2>
+                                <p class="text-sm text-gray-500">Registered vs Unregistered comparison</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button class="btn-export"
+                                onclick="event.stopPropagation(); exportToCSV('eprPurchaseData', 'epr_purchase_summary.csv')">
+                                <i class="fa-solid fa-download"></i>
+                                Export
+                            </button>
+                            <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table-modern" id="eprPurchaseTable">
+                                <thead>
+                                    <tr>
+                                        <th onclick="sortTable('eprPurchaseTable', 0)">Regi/Unregi <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th onclick="sortTable('eprPurchaseTable', 1)">Category <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th onclick="sortTable('eprPurchaseTable', 2)">FY23-24 (A) <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th onclick="sortTable('eprPurchaseTable', 3)">FY24-25 (B) <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th onclick="sortTable('eprPurchaseTable', 4)">Deviation <i
+                                                class="fa-solid fa-sort sort-icon"></i></th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="eprPurchaseTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+        <!-- Modal -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Details</h3>
+                    <button class="modal-close" onclick="closeModal()">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const defaultConfig = {
+            dashboard_title: 'EPR Compliance Dashboard',
+            company_name: 'EcoTrack'
+        };
+
+        let config = { ...defaultConfig };
+
+        // Mock Data
+        const categoriesData = [
+            { category: 'Cat 1', registered: 1250, unregistered: 340, total: 1590, recycled: 980 },
+            { category: 'Cat 2', registered: 890, unregistered: 120, total: 1010, recycled: 760 },
+            { category: 'Cat 3', registered: 650, unregistered: 85, total: 735, recycled: 520 },
+            { category: 'Cat 4', registered: 1120, unregistered: 210, total: 1330, recycled: 1050 },
+            { category: 'Cat 5', registered: 920, unregistered: 165, total: 1085, recycled: 845 }
+        ];
+
+        const containerData = [
+            {
+                capacity: '< 0.9 L/kg',
+                quantity: 450,
+                details: [
+                    { supplierName: 'EcoPlast Industries', registrationStatus: 'Registered', materialType: 'PET', capacity: '250ml', quantity: 120, complianceStatus: 'Compliant', lastUpdated: '2024-01-15' },
+                    { supplierName: 'GreenPoly Ltd', registrationStatus: 'Registered', materialType: 'HDPE', capacity: '500ml', quantity: 180, complianceStatus: 'Compliant', lastUpdated: '2024-01-14' },
+                    { supplierName: 'CleanRecycle Co', registrationStatus: 'Registered', materialType: 'LDPE', capacity: '750ml', quantity: 150, complianceStatus: 'Compliant', lastUpdated: '2024-01-13' }
+                ]
+            },
+            {
+                capacity: '0.9 - 4.9 L/kg',
+                quantity: 780,
+                details: [
+                    { supplierName: 'CrystalClear Glass', registrationStatus: 'Registered', materialType: 'Clear Glass', capacity: '1L', quantity: 280, complianceStatus: 'Compliant', lastUpdated: '2024-01-12' },
+                    { supplierName: 'GlassWorks Inc', registrationStatus: 'Registered', materialType: 'Colored Glass', capacity: '2L', quantity: 250, complianceStatus: 'Compliant', lastUpdated: '2024-01-11' },
+                    { supplierName: 'PureGlass Solutions', registrationStatus: 'Unregistered', materialType: 'Plastic Composite', capacity: '4.5L', quantity: 250, complianceStatus: 'Non-Compliant', lastUpdated: '2024-01-10' }
+                ]
+            },
+            {
+                capacity: '> 4.9 L/kg',
+                quantity: 320,
+                details: [
+                    { supplierName: 'MetalRecycle Pro', registrationStatus: 'Registered', materialType: 'Steel Drums', capacity: '10L', quantity: 180, complianceStatus: 'Compliant', lastUpdated: '2024-01-09' },
+                    { supplierName: 'SteelGreen Ltd', registrationStatus: 'Registered', materialType: 'Aluminum Barrels', capacity: '20L', quantity: 140, complianceStatus: 'Compliant', lastUpdated: '2024-01-08' }
+                ]
+            }
+        ];
+
+        const registeredSupplierData = [
+            {
+                category: 'Cat 1', suppliers: 45, totalQty: 1250, supplierDetails: [
+                    { name: 'EcoPlast Industries', category: 'Cat 1', status: 'Registered', qty: 450, lastSupply: '2024-01-15', rating: 5 },
+                    { name: 'GreenPoly Ltd', category: 'Cat 1', status: 'Registered', qty: 380, lastSupply: '2024-01-12', rating: 4 },
+                    { name: 'CleanRecycle Co', category: 'Cat 1', status: 'Registered', qty: 420, lastSupply: '2024-01-10', rating: 5 }
+                ]
+            },
+            {
+                category: 'Cat 2', suppliers: 28, totalQty: 890, supplierDetails: [
+                    { name: 'CrystalClear Glass', category: 'Cat 2', status: 'Registered', qty: 320, lastSupply: '2024-01-14', rating: 5 },
+                    { name: 'GlassWorks Inc', category: 'Cat 2', status: 'Registered', qty: 290, lastSupply: '2024-01-11', rating: 4 },
+                    { name: 'PureGlass Solutions', category: 'Cat 2', status: 'Registered', qty: 280, lastSupply: '2024-01-09', rating: 4 }
+                ]
+            },
+            {
+                category: 'Cat 3', suppliers: 22, totalQty: 650, supplierDetails: [
+                    { name: 'MetalRecycle Pro', category: 'Cat 3', status: 'Registered', qty: 250, lastSupply: '2024-01-13', rating: 5 },
+                    { name: 'SteelGreen Ltd', category: 'Cat 3', status: 'Registered', qty: 200, lastSupply: '2024-01-08', rating: 4 },
+                    { name: 'AlumCycle Corp', category: 'Cat 3', status: 'Registered', qty: 200, lastSupply: '2024-01-06', rating: 3 }
+                ]
+            },
+            {
+                category: 'Cat 4', suppliers: 35, totalQty: 1120, supplierDetails: [
+                    { name: 'PaperMill Eco', category: 'Cat 4', status: 'Registered', qty: 420, lastSupply: '2024-01-15', rating: 5 },
+                    { name: 'GreenPulp Industries', category: 'Cat 4', status: 'Registered', qty: 380, lastSupply: '2024-01-12', rating: 4 },
+                    { name: 'RecyclePaper Co', category: 'Cat 4', status: 'Registered', qty: 320, lastSupply: '2024-01-10', rating: 5 }
+                ]
+            },
+            {
+                category: 'Cat 5', suppliers: 18, totalQty: 920, supplierDetails: [
+                    { name: 'EcoTech Solutions', category: 'Cat 5', status: 'Registered', qty: 350, lastSupply: '2024-01-14', rating: 5 },
+                    { name: 'GreenCycle Ltd', category: 'Cat 5', status: 'Registered', qty: 300, lastSupply: '2024-01-13', rating: 4 },
+                    { name: 'RecycleMax Corp', category: 'Cat 5', status: 'Registered', qty: 270, lastSupply: '2024-01-11', rating: 4 }
+                ]
+            }
+        ];
+
+        const unregisteredSupplierData = [
+            {
+                category: 'Cat 1', suppliers: 12, totalQty: 340, supplierDetails: [
+                    { name: 'QuickPlast Supply', category: 'Cat 1', status: 'Unregistered', qty: 150, lastSupply: '2024-01-08', rating: 2 },
+                    { name: 'LocalPoly Traders', category: 'Cat 1', status: 'Unregistered', qty: 110, lastSupply: '2024-01-05', rating: 3 },
+                    { name: 'FastRecycle Ltd', category: 'Cat 1', status: 'Unregistered', qty: 80, lastSupply: '2024-01-03', rating: 2 }
+                ]
+            },
+            {
+                category: 'Cat 2', suppliers: 5, totalQty: 120, supplierDetails: [
+                    { name: 'QuickGlass Co', category: 'Cat 2', status: 'Unregistered', qty: 70, lastSupply: '2024-01-07', rating: 2 },
+                    { name: 'LocalGlass Supply', category: 'Cat 2', status: 'Unregistered', qty: 50, lastSupply: '2024-01-04', rating: 3 }
+                ]
+            },
+            {
+                category: 'Cat 3', suppliers: 4, totalQty: 85, supplierDetails: [
+                    { name: 'ScrapMetal Direct', category: 'Cat 3', status: 'Unregistered', qty: 50, lastSupply: '2024-01-06', rating: 2 },
+                    { name: 'MetalTraders Local', category: 'Cat 3', status: 'Unregistered', qty: 35, lastSupply: '2024-01-02', rating: 2 }
+                ]
+            },
+            {
+                category: 'Cat 4', suppliers: 8, totalQty: 210, supplierDetails: [
+                    { name: 'QuickPaper Supply', category: 'Cat 4', status: 'Unregistered', qty: 120, lastSupply: '2024-01-09', rating: 3 },
+                    { name: 'LocalPulp Traders', category: 'Cat 4', status: 'Unregistered', qty: 90, lastSupply: '2024-01-05', rating: 2 }
+                ]
+            },
+            {
+                category: 'Cat 5', suppliers: 6, totalQty: 165, supplierDetails: [
+                    { name: 'QuickEco Supply', category: 'Cat 5', status: 'Unregistered', qty: 95, lastSupply: '2024-01-10', rating: 2 },
+                    { name: 'LocalGreen Traders', category: 'Cat 5', status: 'Unregistered', qty: 70, lastSupply: '2024-01-07', rating: 3 }
+                ]
+            }
+        ];
+
+        const eprPurchaseData = [
+            {
+                regiStatus: 'Registered', category: 'Cat 1', fy2324: 1250, fy2425: 1420, invoices: [
+                    { invoiceNo: 'INV-2024-001', date: '2024-01-15', category: 'Cat 1', materialType: 'Type A', quantity: 220, recycledPct: 85, gstPaid: 65000 },
+                    { invoiceNo: 'INV-2024-002', date: '2024-01-18', category: 'Cat 1', materialType: 'Type B', quantity: 185, recycledPct: 78, gstPaid: 58000 },
+                    { invoiceNo: 'INV-2024-003', date: '2024-01-22', category: 'Cat 1', materialType: 'Type C', quantity: 215, recycledPct: 82, gstPaid: 62000 }
+                ]
+            },
+            {
+                regiStatus: 'Unregistered', category: 'Cat 1', fy2324: 340, fy2425: 285, invoices: [
+                    { invoiceNo: 'INV-2024-101', date: '2024-01-10', category: 'Cat 1', materialType: 'Type A', quantity: 160, recycledPct: 72, gstPaid: 42000 },
+                    { invoiceNo: 'INV-2024-102', date: '2024-01-14', category: 'Cat 1', materialType: 'Type B', quantity: 125, recycledPct: 68, gstPaid: 38000 }
+                ]
+            }
+        ];
+
+        // Initialize Element SDK
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange: async (newConfig) => {
+                    config = { ...config, ...newConfig };
+
+                    document.getElementById('dashboardTitleDisplay').textContent = config.dashboard_title || defaultConfig.dashboard_title;
+                    document.getElementById('companyNameDisplay').textContent = config.company_name || defaultConfig.company_name;
+                },
+                mapToCapabilities: (cfg) => ({
+                    recolorables: [],
+                    borderables: [],
+                    fontEditable: undefined,
+                    fontSizeable: undefined
+                }),
+                mapToEditPanelValues: (cfg) => new Map([
+                    ['dashboard_title', cfg.dashboard_title || defaultConfig.dashboard_title],
+                    ['company_name', cfg.company_name || defaultConfig.company_name]
+                ])
+            });
+        }
+
+        // Toggle section collapse
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const body = section.querySelector('.card-body');
+            const chevron = section.querySelector('.chevron-icon');
+
+            body.classList.toggle('collapsed');
+            chevron.classList.toggle('rotated');
+        }
+
+        // Generate star rating HTML
+        function generateStars(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                stars += `<i class="fa-solid fa-star ${i > rating ? 'empty' : ''}"></i>`;
+            }
+            return `<span class="star-rating">${stars}</span>`;
+        }
+
+        // Calculate deviation
+        function calculateDeviation(a, b) {
+            if (a === 0) return 0;
+            return ((b / a) - 1) * 100;
+        }
+
+        // Format deviation display
+        function formatDeviation(deviation) {
+            const isPositive = deviation >= 0;
+            const icon = isPositive ? 'fa-arrow-up' : 'fa-arrow-down';
+            const className = isPositive ? 'deviation-positive' : 'deviation-negative';
+            return `<span class="${className}"><i class="fa-solid ${icon}"></i> ${Math.abs(deviation).toFixed(1)}%</span>`;
+        }
+
+        // Render Categories Table
+        function renderCategoriesTable(data) {
+            const tbody = document.getElementById('categoriesTableBody');
+            const tfoot = document.getElementById('categoriesTableFoot');
+
+            let totalRegistered = 0, totalUnregistered = 0, totalAll = 0, totalRecycled = 0;
+
+            tbody.innerHTML = data.map(row => {
+                totalRegistered += row.registered;
+                totalUnregistered += row.unregistered;
+                totalAll += row.total;
+                totalRecycled += row.recycled;
+
+                return `
+          <tr>
+            <td><strong>${row.category}</strong></td>
+            <td><span class="badge badge-success"><i class="fa-solid fa-check-circle"></i> ${row.registered.toLocaleString()}</span></td>
+            <td><span class="badge badge-danger"><i class="fa-solid fa-times-circle"></i> ${row.unregistered.toLocaleString()}</span></td>
+            <td><strong>${row.total.toLocaleString()}</strong></td>
+            <td><span class="badge badge-info"><i class="fa-solid fa-recycle"></i> ${row.recycled.toLocaleString()}</span></td>
+          </tr>
+        `;
+            }).join('');
+
+            tfoot.innerHTML = `
+        <tr>
+          <td><strong>TOTAL</strong></td>
+          <td>${totalRegistered.toLocaleString()}</td>
+          <td>${totalUnregistered.toLocaleString()}</td>
+          <td>${totalAll.toLocaleString()}</td>
+          <td>${totalRecycled.toLocaleString()}</td>
+        </tr>
+      `;
+        }
+
+        // Render Container Table
+        function renderContainerTable(data) {
+            const tbody = document.getElementById('containerTableBody');
+
+            tbody.innerHTML = data.map((row, index) => `
+        <tr>
+          <td><strong>${row.capacity}</strong></td>
+          <td>${row.quantity.toLocaleString()} tons</td>
+          <td>
+            <button class="btn-icon" onclick="showContainerDetails(${index})" aria-label="View details for ${row.capacity}">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+        }
+
+        // Render Registered Supplier Table
+        function renderRegisteredSupplierTable(data) {
+            const tbody = document.getElementById('registeredSupplierTableBody');
+
+            tbody.innerHTML = data.map((row, index) => `
+        <tr>
+          <td><strong>${row.category}</strong></td>
+          <td><span class="badge badge-success">${row.suppliers} suppliers</span></td>
+          <td>${row.totalQty.toLocaleString()} tons</td>
+          <td>
+            <button class="btn-icon" onclick="showRegisteredSupplierDetails(${index})" aria-label="View supplier details for ${row.category}">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+        }
+
+        // Render Unregistered Supplier Table
+        function renderUnregisteredSupplierTable(data) {
+            const tbody = document.getElementById('unregisteredSupplierTableBody');
+
+            tbody.innerHTML = data.map((row, index) => `
+        <tr>
+          <td><strong>${row.category}</strong></td>
+          <td><span class="badge badge-danger">${row.suppliers} suppliers</span></td>
+          <td>${row.totalQty.toLocaleString()} tons</td>
+          <td>
+            <button class="btn-icon" onclick="showUnregisteredSupplierDetails(${index})" aria-label="View supplier details for ${row.category}">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+        }
+
+        // Render EPR Purchase Table
+        function renderEprPurchaseTable(data) {
+            const tbody = document.getElementById('eprPurchaseTableBody');
+
+            tbody.innerHTML = data.map((row, index) => {
+                const deviation = calculateDeviation(row.fy2324, row.fy2425);
+                const statusBadge = row.regiStatus === 'Registered'
+                    ? `<span class="badge badge-success"><i class="fa-solid fa-check-circle"></i> ${row.regiStatus}</span>`
+                    : `<span class="badge badge-danger"><i class="fa-solid fa-times-circle"></i> ${row.regiStatus}</span>`;
+                return `
+          <tr>
+            <td>${statusBadge}</td>
+            <td><strong>${row.category}</strong></td>
+            <td>${row.fy2324.toLocaleString()} MT</td>
+            <td>${row.fy2425.toLocaleString()} MT</td>
+            <td>${formatDeviation(deviation)}</td>
+            <td>
+              <button class="btn-icon" onclick="showEprPurchaseDetails(${index})" aria-label="View invoice details">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+            }).join('');
+        }
+
+        // Modal Functions
+        function openModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalBody').innerHTML = content;
+            document.getElementById('modalOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on overlay click
+        document.getElementById('modalOverlay').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('modalOverlay')) {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Show Container Details Modal
+        function showContainerDetails(index) {
+            const container = containerData[index];
+            const content = `
+        <div class="table-responsive">
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th>Supplier Name</th>
+                <th>Registration Status</th>
+                <th>Material Type</th>
+                <th>Container Capacity (L/kg)</th>
+                <th>Quantity (Tons)</th>
+                <th>Compliance Status</th>
+                <th>Last Updated</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${container.details.map(detail => `
+                <tr>
+                  <td><strong>${detail.supplierName}</strong></td>
+                  <td><span class="badge ${detail.registrationStatus === 'Registered' ? 'badge-success' : 'badge-danger'}"><i class="fa-solid ${detail.registrationStatus === 'Registered' ? 'fa-check-circle' : 'fa-times-circle'}"></i> ${detail.registrationStatus}</span></td>
+                  <td>${detail.materialType}</td>
+                  <td><strong>${detail.capacity}</strong></td>
+                  <td>${detail.quantity.toLocaleString()}</td>
+                  <td><span class="badge ${detail.complianceStatus === 'Compliant' ? 'badge-success' : 'badge-warning'}"><i class="fa-solid fa-check-circle"></i> ${detail.complianceStatus}</span></td>
+                  <td>${detail.lastUpdated}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+            openModal(`Container Capacity: ${container.capacity}`, content);
+        }
+
+        // Show Registered Supplier Details Modal
+        function showRegisteredSupplierDetails(index) {
+            const supplier = registeredSupplierData[index];
+            const content = `
+        <div class="table-responsive">
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th>Supplier Name</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Total Qty (Tons)</th>
+                <th>Last Supply</th>
+                <th>Rating</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${supplier.supplierDetails.map(detail => `
+                <tr>
+                  <td><strong>${detail.name}</strong></td>
+                  <td>${detail.category}</td>
+                  <td><span class="badge badge-success">${detail.status}</span></td>
+                  <td>${detail.qty.toLocaleString()} tons</td>
+                  <td>${detail.lastSupply}</td>
+                  <td>${generateStars(detail.rating)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+            openModal(`Registered Suppliers: ${supplier.category}`, content);
+        }
+
+        // Show Unregistered Supplier Details Modal
+        function showUnregisteredSupplierDetails(index) {
+            const supplier = unregisteredSupplierData[index];
+            const content = `
+        <div class="table-responsive">
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th>Supplier Name</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Total Qty (Tons)</th>
+                <th>Last Supply</th>
+                <th>Rating</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${supplier.supplierDetails.map(detail => `
+                <tr>
+                  <td><strong>${detail.name}</strong></td>
+                  <td>${detail.category}</td>
+                  <td><span class="badge badge-danger">${detail.status}</span></td>
+                  <td>${detail.qty.toLocaleString()} tons</td>
+                  <td>${detail.lastSupply}</td>
+                  <td>${generateStars(detail.rating)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+            openModal(`Unregistered Suppliers: ${supplier.category}`, content);
+        }
+
+        // Show EPR Purchase Details Modal
+        function showEprPurchaseDetails(index) {
+            const purchase = eprPurchaseData[index];
+            const content = `
+        <div class="table-responsive">
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th>Invoice Number</th>
+                <th>Invoice Date</th>
+                <th>Category</th>
+                <th>Material Type</th>
+                <th>Quantity (MT)</th>
+                <th>Recycled %</th>
+                <th>GST Paid (INR)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${purchase.invoices.map(invoice => `
+                <tr>
+                  <td><strong>${invoice.invoiceNo}</strong></td>
+                  <td>${invoice.date}</td>
+                  <td>${invoice.category}</td>
+                  <td>${invoice.materialType}</td>
+                  <td>${invoice.quantity.toLocaleString()} MT</td>
+                  <td><span class="badge badge-success">${invoice.recycledPct}%</span></td>
+                  <td>₹${invoice.gstPaid.toLocaleString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+            openModal(`Invoice Details: ${purchase.regiStatus}`, content);
+        }
+
+        // Sort Table Function
+        function sortTable(tableId, columnIndex) {
+            const table = document.getElementById(tableId);
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const headers = table.querySelectorAll('thead th');
+
+            // Get current sort direction
+            const currentHeader = headers[columnIndex];
+            const isAscending = !currentHeader.classList.contains('sorted-asc');
+
+            // Reset all headers
+            headers.forEach(th => {
+                th.classList.remove('sorted', 'sorted-asc', 'sorted-desc');
+            });
+
+            // Set current header sort state
+            currentHeader.classList.add('sorted', isAscending ? 'sorted-asc' : 'sorted-desc');
+
+            // Sort rows
+            rows.sort((a, b) => {
+                let aValue = a.cells[columnIndex].textContent.trim();
+                let bValue = b.cells[columnIndex].textContent.trim();
+
+                // Try to parse as numbers
+                const aNum = parseFloat(aValue.replace(/[^0-9.-]/g, ''));
+                const bNum = parseFloat(bValue.replace(/[^0-9.-]/g, ''));
+
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return isAscending ? aNum - bNum : bNum - aNum;
+                }
+
+                // Sort as strings
+                return isAscending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+            });
+
+            // Re-append sorted rows
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Export to CSV Function
+        function exportToCSV(dataName, filename) {
+            let data;
+            let headers;
+
+            switch (dataName) {
+                case 'categoriesData':
+                    headers = ['Category', 'Registered', 'Unregistered', 'Total', 'Recycled'];
+                    data = categoriesData.map(row => [row.category, row.registered, row.unregistered, row.total, row.recycled]);
+                    break;
+                case 'containerData':
+                    headers = ['Container Capacity', 'Quantity (Tons)'];
+                    data = containerData.map(row => [row.capacity, row.quantity]);
+                    break;
+                case 'registeredSupplierData':
+                    headers = ['Category', 'Suppliers', 'Total Qty (Tons)'];
+                    data = registeredSupplierData.map(row => [row.category, row.suppliers, row.totalQty]);
+                    break;
+                case 'unregisteredSupplierData':
+                    headers = ['Category', 'Suppliers', 'Total Qty (Tons)'];
+                    data = unregisteredSupplierData.map(row => [row.category, row.suppliers, row.totalQty]);
+                    break;
+                case 'eprPurchaseData':
+                    headers = ['Regi/Unregi', 'Category', 'FY23-24', 'FY24-25', 'Deviation'];
+                    data = eprPurchaseData.map(row => {
+                        const deviation = calculateDeviation(row.fy2324, row.fy2425);
+                        return [row.regiStatus, row.category, row.fy2324, row.fy2425, deviation.toFixed(1) + '%'];
+                    });
+                    break;
+                default:
+                    return;
+            }
+
+            // Create CSV content
+            let csvContent = headers.join(',') + '\n';
+            csvContent += data.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Filter functionality
+        const categoryFilter = document.getElementById('categoryFilter');
+        const statusFilter = document.getElementById('statusFilter');
+
+        function applyFilters() {
+            const category = categoryFilter.value;
+            const status = statusFilter.value;
+
+            // Filter categories data
+            let filteredCategories = categoriesData;
+            if (category) {
+                filteredCategories = categoriesData.filter(row => row.category === category);
+            }
+            renderCategoriesTable(filteredCategories);
+
+            // Filter supplier data based on status
+            if (status === 'Registered') {
+                let filteredRegistered = registeredSupplierData;
+                if (category) {
+                    filteredRegistered = registeredSupplierData.filter(row => row.category === category);
+                }
+                renderRegisteredSupplierTable(filteredRegistered);
+                renderUnregisteredSupplierTable([]);
+            } else if (status === 'Unregistered') {
+                let filteredUnregistered = unregisteredSupplierData;
+                if (category) {
+                    filteredUnregistered = unregisteredSupplierData.filter(row => row.category === category);
+                }
+                renderRegisteredSupplierTable([]);
+                renderUnregisteredSupplierTable(filteredUnregistered);
+            } else {
+                let filteredRegistered = registeredSupplierData;
+                let filteredUnregistered = unregisteredSupplierData;
+                if (category) {
+                    filteredRegistered = registeredSupplierData.filter(row => row.category === category);
+                    filteredUnregistered = unregisteredSupplierData.filter(row => row.category === category);
+                }
+                renderRegisteredSupplierTable(filteredRegistered);
+                renderUnregisteredSupplierTable(filteredUnregistered);
+            }
+
+            // Filter EPR data
+            let filteredEpr = eprPurchaseData;
+            if (category) {
+                filteredEpr = eprPurchaseData.filter(row => row.category === category);
+            }
+            renderEprPurchaseTable(filteredEpr);
+        }
+
+        categoryFilter.addEventListener('change', applyFilters);
+        statusFilter.addEventListener('change', applyFilters);
+
+        // Initial render
+        renderCategoriesTable(categoriesData);
+        renderContainerTable(containerData);
+        renderRegisteredSupplierTable(registeredSupplierData);
+        renderUnregisteredSupplierTable(unregisteredSupplierData);
+        renderEprPurchaseTable(eprPurchaseData);
+    </script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9cf5e72e52d24561',t:'MTc3MTMzNzc5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+
+</html>
+
+ 
